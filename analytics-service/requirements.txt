@@ -1,0 +1,4 @@
+flask
+kafka-python
+duckdb
+flask-cors
