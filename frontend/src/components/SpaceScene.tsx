@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Stars as DreiStars } from "@react-three/drei";
+import { Stars as DreiStars, OrbitControls } from "@react-three/drei";
 import Planet from "./3dObjects/Planet";
 import Spaceship from "./3dObjects/Spaceship";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -10,6 +10,43 @@ const SpaceScene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   const targetZRef = useRef(8); // position cible de la caméra sur Z
   const controlsRef = useRef<any>(null);
+
+  // Gestion du scroll lissé (avancée dans la scène)
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      // Ajuste la cible Z de manière régulière
+      const sensitivity = 0.02; // facteur de déplacement
+      targetZRef.current += e.deltaY * sensitivity;
+      // Limites de déplacement
+      targetZRef.current = THREE.MathUtils.clamp(targetZRef.current, -40, 200);
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel as EventListener);
+  }, []);
+
+  // Driver lissé de la caméra vers targetZ
+  const SmoothCameraDriver = () => {
+    useFrame(({ camera }, delta) => {
+      const newZ = THREE.MathUtils.damp(
+        camera.position.z,
+        targetZRef.current,
+        3, // coefficient d'amortissement
+        delta
+      );
+      camera.position.z = newZ;
+      // Maintient la caméra regardant "devant" en déplaçant la cible des controls
+      if (controlsRef.current) {
+        const target = controlsRef.current.target;
+        target.z = newZ - 10; // décale la cible 10 unités devant
+        controlsRef.current.update();
+      } else {
+        camera.lookAt(0, 0, newZ - 10);
+      }
+    });
+    return null;
+  };
 
   // Génération de planètes à différentes profondeurs
   const planets = useMemo(
@@ -27,42 +64,6 @@ const SpaceScene = () => {
     []
   );
 
-  // Gestion du scroll lissé (avancée dans la scène)
-  useEffect(() => {
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      // Ajuste la cible Z de manière régulière
-      const sensitivity = 0.02; // facteur de déplacement
-      targetZRef.current += e.deltaY * sensitivity;
-      // Limites de déplacement
-      targetZRef.current = THREE.MathUtils.clamp(targetZRef.current, -40, 200);      
-    };
-
-    window.addEventListener("wheel", onWheel, { passive: false });
-    return () => window.removeEventListener("wheel", onWheel as EventListener);
-  }, []);
-
-  // Driver lissé de la caméra vers targetZ
-  const SmoothCameraDriver = () => {
-    useFrame(({ camera }, delta) => {
-      const newZ = THREE.MathUtils.damp(
-        camera.position.z,
-        targetZRef.current,
-        3, // coefficient d’amortissement
-        delta
-      );
-      camera.position.z = newZ;
-      // Maintient la caméra regardant "devant" en déplaçant la cible des controls
-      if (controlsRef.current) {
-        const target = controlsRef.current.target;
-        target.z = newZ - 10; // décale la cible 10 unités devant
-        controlsRef.current.update();
-      } else {
-        camera.lookAt(0, 0, newZ - 10);
-      }
-    });
-    return null;
-  };
   
   return (
     <>
@@ -74,8 +75,15 @@ const SpaceScene = () => {
         {/* Fond étoilé via drei */}
         <DreiStars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
 
-        {/* Vaisseau spatial près de la caméra */}
-        <Spaceship position={[-0.07, 0.2, 9.5]} rotation={[0, 135.05, 0]} scale={0.01} useMotions={false} />
+        {/* Vaisseau spatial attaché à la caméra */}
+        <Spaceship
+          position={[0, 0.2, 9.5]}
+          rotation={[0, 135.1, 0]}
+          scale={0.01}
+          useMotions={false}
+          followCamera
+          zOffset={1.5}
+        />
 
         {planets.map((p, idx) => (
           <Planet
@@ -93,18 +101,17 @@ const SpaceScene = () => {
           makeDefault
           enableZoom={false}
           enablePan={false}
-          enableRotate={false}
+          enableRotate={true}
         />
       </Canvas>
-
-      {selectedPlanet && (
+      {/* {selectedPlanet && (
         <div className="holo-container">
           <h2>{selectedPlanet}</h2>
           <p>📊 Prix: ...</p>
           <p>💰 MarketCap: ...</p>
           <p>📈 Variation: ...</p>
         </div>
-      )}
+      )} */}
     </>
   );
 };
