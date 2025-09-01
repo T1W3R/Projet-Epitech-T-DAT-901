@@ -8,6 +8,10 @@ type SpaceshipProps = {
   scale?: number;
   rotation?: [number, number, number];
   useMotions?: boolean;
+  // Si true, synchronise la position Z avec la caméra
+  followCamera?: boolean;
+  // Décalage appliqué par rapport à la caméra sur l'axe Z
+  zOffset?: number;
 };
 
 // Composant pour charger le modèle FBX
@@ -47,7 +51,9 @@ const Spaceship = ({
   position = [0, 0, 0],
   scale = 0.01,
   rotation = [0, 0, 0],
-  useMotions = true
+  useMotions = true,
+  followCamera = false,
+  zOffset = 1.5,
 }: SpaceshipProps) => {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -55,11 +61,16 @@ const Spaceship = ({
   useFrame((state) => {
     if (groupRef.current) {
       if (useMotions) {
-      // Légère oscillation de rotation sur l'axe Z
-      groupRef.current.rotation.z += rotation[2] + Math.sin(state.clock.elapsedTime * 1) * 0.0005;
+        // Légère oscillation de rotation sur l'axe Z
+        groupRef.current.rotation.z += Math.sin(state.clock.elapsedTime * 1) * 0.0005;
 
-      // Légère oscillation de position sur l'axe Y
+        // Légère oscillation de position sur l'axe Y
         groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 1) * 0.05;
+      }
+
+      // Suivi simple de la caméra sur l'axe Z
+      if (followCamera) {
+        groupRef.current.position.z = state.camera.position.z + zOffset;
       }
     }
   });
