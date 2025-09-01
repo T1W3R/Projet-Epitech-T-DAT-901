@@ -1,11 +1,11 @@
 .holo-container {
-  position: "absolute";
-  top: 20;
-  right: 20;
-  padding: "20px";
-  background: "rgba(0,255,255,0.1)";
-  border: "1px solid cyan";
-  border-radius: "12px";
-  color: "cyan";
-  font-family: "monospace";
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 20px;
+  background: rgba(0,255,255,0.1);
+  border: 1px solid cyan;
+  border-radius: 12px;
+  color: cyan;
+  font-family: monospace;
 }
