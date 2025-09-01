@@ -1,6 +1,7 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars as DreiStars } from "@react-three/drei";
 import Planet from "./3dObjects/Planet";
+import Spaceship from "./3dObjects/Spaceship";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import './SpaceScene.css';
@@ -72,6 +73,9 @@ const SpaceScene = () => {
 
         {/* Fond étoilé via drei */}
         <DreiStars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
+
+        {/* Vaisseau spatial près de la caméra */}
+        <Spaceship position={[-0.07, 0.2, 9.5]} rotation={[0, 135.05, 0]} scale={0.01} useMotions={false} />
 
         {planets.map((p, idx) => (
           <Planet
