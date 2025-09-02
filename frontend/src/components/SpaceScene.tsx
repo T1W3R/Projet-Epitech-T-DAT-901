@@ -2,16 +2,18 @@ import { Canvas } from "@react-three/fiber";
 import { Stars as DreiStars, OrbitControls, useHelper } from "@react-three/drei";
 import Planet from "./3dObjects/Planet";
 import Spaceship from "./3dObjects/Spaceship";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
 import * as THREE from "three";
 import './SpaceScene.css';
 
-const ShipWithSpotlight = () => {
-  const shipPos: [number, number, number] = [0, 0.2, 9];
+const ShipWithSpotlight = ({ debug = false }: { debug?: boolean }) => {
+  const shipPos: [number, number, number] = [0.025, 0.2, 9];
 
   const spotRef = useRef<THREE.SpotLight>(null);
   const targetRef = useRef<THREE.Object3D>(null);
-  useHelper(spotRef as any, THREE.SpotLightHelper, "cyan");
+  if (debug) {
+    useHelper(spotRef as any, THREE.SpotLightHelper, "cyan");
+  }
 
   useEffect(() => {
     if (!spotRef.current || !targetRef.current) return;
@@ -50,11 +52,11 @@ const ShipWithSpotlight = () => {
   );
 };
 
-const SpaceScene = () => {
-  const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
+// Composant de la scène 3D pure (ne se re-render pas)
+const Scene3D = memo(({ onPlanetClick, debug = false }: { onPlanetClick: (name: string) => void, debug?: boolean }) => {
   const controlsRef = useRef<typeof OrbitControls>(null);
 
-  // Génération de planètes à différentes profondeurs
+  // Génération de planètes à différentes profondeurs (stable)
   const planets = useMemo(
     () => [
       { name: "Bitcoin",    position: [-6,  2, -5]  as [number, number, number], textureUrl: "" },
@@ -72,26 +74,25 @@ const SpaceScene = () => {
 
   return (
     <>
-      <Canvas camera={{ position: [0, 0, 8], fov: 60, near: 0.1, far: 500 }}>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[5, 8, 5]} intensity={1.5} />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 8, 5]} intensity={1.5} />
 
-        {/* Fond étoilé via drei */}
-        <DreiStars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
+      {/* Fond étoilé via drei */}
+      <DreiStars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
 
-        {/* Vaisseau + spotLight avec helpers */}
-        <ShipWithSpotlight />
+      {/* Vaisseau + spotLight avec helpers */}
+      <ShipWithSpotlight debug={debug} />
 
-        {planets.map((p, idx) => (
-          <Planet
-            key={`${p.name}-${idx}`}
-            name={p.name}
-            position={p.position}
-            textureUrl={p.textureUrl}
-            onClick={setSelectedPlanet}
-          />
-        ))}
-
+      {planets.map((p, idx) => (
+        <Planet
+          key={`${p.name}-${idx}`}
+          name={p.name}
+          position={p.position}
+          textureUrl={p.textureUrl}
+          onClick={onPlanetClick}
+        />
+      ))}
+      {debug && (
         <OrbitControls
           ref={controlsRef as any}
           enableDamping
@@ -100,6 +101,24 @@ const SpaceScene = () => {
           enablePan={true}
           enableRotate={true}
         />
+      )}
+    </>
+  );
+});
+
+// Composant principal avec le state (seul le HUD se re-render)
+const SpaceScene = () => {
+  const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
+  
+  // Stabilise la fonction pour éviter les re-renders de Scene3D
+  const handlePlanetClick = useCallback((name: string) => {
+    setSelectedPlanet(name);
+  }, []);
+
+  return (
+    <>
+      <Canvas camera={{ position: [0, 0, 8], fov: 60, near: 0.1, far: 500 }}>
+        <Scene3D onPlanetClick={handlePlanetClick} debug={false} />
       </Canvas>
       {selectedPlanet && (
         <div className="holo-container">
