@@ -3,9 +3,25 @@
   top: 20px;
   right: 20px;
   padding: 20px;
-  background: rgba(0,255,255,0.1);
+  background: rgba(0, 255, 255, 0.1);
   border: 1px solid cyan;
   border-radius: 12px;
   color: cyan;
   font-family: monospace;
+}
+
+.holo-back-button {
+  position: fixed;
+  top: 80%;
+  right: 46%;
+  padding: 12px 24px;
+  background-color: rgba(0, 255, 255, 0.2);
+  border: 2px solid cyan;
+  color: cyan;
+  cursor: pointer;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 14px;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
 }
