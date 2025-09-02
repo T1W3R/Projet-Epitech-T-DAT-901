@@ -3,8 +3,10 @@ import { Stars as DreiStars, OrbitControls, useHelper } from "@react-three/drei"
 import Planet from "./3dObjects/Planet";
 import Spaceship from "./3dObjects/Spaceship";
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import './SpaceScene.css';
+import HoloScreen from "./3dObjects/HoloScreen";
 
 const ShipWithSpotlight = ({ debug = false }: { debug?: boolean }) => {
   const shipPos: [number, number, number] = [0.025, 0.2, 9];
@@ -32,7 +34,7 @@ const ShipWithSpotlight = ({ debug = false }: { debug?: boolean }) => {
         useMotions={false}
       />
 
-      {/* SpotLight au-dessus du vaisseau, pointant vers le bas */}
+      {/* SpotLight dans le vaisseau visant les écrans holographiques */}
       <spotLight
         ref={spotRef}
         intensity={25}
@@ -52,8 +54,83 @@ const ShipWithSpotlight = ({ debug = false }: { debug?: boolean }) => {
   );
 };
 
-// Composant de la scène 3D pure (ne se re-render pas)
-const Scene3D = memo(({ onPlanetClick, debug = false }: { onPlanetClick: (name: string) => void, debug?: boolean }) => {
+// Composant pour gérer l'animation de la caméra
+const CameraController = memo(({ 
+  isZoomedToHolo, 
+  onZoomComplete 
+}: { 
+  isZoomedToHolo: boolean;
+  onZoomComplete?: () => void;
+}) => {
+  const { camera } = useThree();
+  const animationRef = useRef({ 
+    isAnimating: false, 
+    startPos: new THREE.Vector3(),
+    startLookAt: new THREE.Vector3(),
+    targetPos: new THREE.Vector3(),
+    targetLookAt: new THREE.Vector3(),
+    progress: 0
+  });
+
+  // Positions fixes pour éviter les problèmes de mutation (une seule fois)
+  const positionsRef = useRef({
+    HOLO_POSITION: new THREE.Vector3(-0.01, -0.21, 6.8),
+    HOLO_LOOK_AT: new THREE.Vector3(-0.01, -0.21, 6.24),
+    MAIN_POSITION: new THREE.Vector3(0, 0, 8),
+    MAIN_LOOK_AT: new THREE.Vector3(0, 0, 0)
+  });
+  const { HOLO_POSITION, HOLO_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
+
+  useFrame((_, delta) => {
+    const anim = animationRef.current;
+    
+    if (isZoomedToHolo && !anim.isAnimating && camera.position.distanceTo(HOLO_POSITION) > 0.1) {
+      // Commencer l'animation vers l'écran holo
+      anim.isAnimating = true;
+      anim.startPos.copy(camera.position);
+      anim.startLookAt.copy(MAIN_LOOK_AT);
+      anim.targetPos.copy(HOLO_POSITION);
+      anim.targetLookAt.copy(HOLO_LOOK_AT);
+      anim.progress = 0;
+    } else if (!isZoomedToHolo && !anim.isAnimating && camera.position.distanceTo(MAIN_POSITION) > 0.1) {
+      // Commencer l'animation de retour
+      anim.isAnimating = true;
+      anim.startPos.copy(camera.position);
+      anim.startLookAt.copy(HOLO_LOOK_AT);
+      anim.targetPos.copy(MAIN_POSITION);
+      anim.targetLookAt.copy(MAIN_LOOK_AT);
+      anim.progress = 0;
+    }
+
+    if (anim.isAnimating) {
+      anim.progress += delta * 2; // Vitesse d'animation
+      
+      if (anim.progress >= 1) {
+        anim.progress = 1;
+        anim.isAnimating = false;
+        console.log("✅ Animation terminée, isZoomedToHolo:", isZoomedToHolo);
+        onZoomComplete && onZoomComplete();
+      }
+      
+      // Interpolation smooth (ease-in-out)
+      const t = 0.5 - 0.5 * Math.cos(anim.progress * Math.PI);
+      
+      // Position de la caméra
+      camera.position.lerpVectors(anim.startPos, anim.targetPos, t);
+    }
+  });
+
+  return null;
+});
+
+// Composant de la scène 3D pure (ne se re-render JAMAIS)
+const Scene3D = memo(({ 
+  onPlanetClick, 
+  debug = false
+}: { 
+  onPlanetClick: (name: string) => void;
+  debug?: boolean;
+}) => {
   const controlsRef = useRef<typeof OrbitControls>(null);
 
   // Génération de planètes à différentes profondeurs (stable)
@@ -73,7 +150,7 @@ const Scene3D = memo(({ onPlanetClick, debug = false }: { onPlanetClick: (name: 
   );
 
   return (
-    <>
+    <>      
       <ambientLight intensity={0.6} />
       <directionalLight position={[5, 8, 5]} intensity={1.5} />
 
@@ -92,12 +169,14 @@ const Scene3D = memo(({ onPlanetClick, debug = false }: { onPlanetClick: (name: 
           onClick={onPlanetClick}
         />
       ))}
+      
+      {/* OrbitControls pour debug uniquement */}
       {debug && (
         <OrbitControls
           ref={controlsRef as any}
           enableDamping
           makeDefault
-          enableZoom={false}
+          enableZoom={true}
           enablePan={true}
           enableRotate={true}
         />
@@ -109,23 +188,44 @@ const Scene3D = memo(({ onPlanetClick, debug = false }: { onPlanetClick: (name: 
 // Composant principal avec le state (seul le HUD se re-render)
 const SpaceScene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
+  const [isZoomedToHolo, setIsZoomedToHolo] = useState(false);
   
   // Stabilise la fonction pour éviter les re-renders de Scene3D
   const handlePlanetClick = useCallback((name: string) => {
     setSelectedPlanet(name);
   }, []);
 
+  // Gestionnaire pour le clic sur l'écran holographique (stabilisé avec ref)
+  const isZoomedRef = useRef(isZoomedToHolo);
+  isZoomedRef.current = isZoomedToHolo;
+  
+  const handleHoloScreenClick = useCallback(() => {
+    setIsZoomedToHolo(!isZoomedRef.current);
+  }, []);
+
   return (
     <>
       <Canvas camera={{ position: [0, 0, 8], fov: 60, near: 0.1, far: 500 }}>
-        <Scene3D onPlanetClick={handlePlanetClick} debug={false} />
+        {/* Contrôleur d'animation de caméra (indépendant de la scène) */}
+        <CameraController isZoomedToHolo={isZoomedToHolo} />
+        
+        <Scene3D 
+          onPlanetClick={handlePlanetClick} 
+          debug={false}
+        />
+        <HoloScreen 
+          selectedPlanet={selectedPlanet} 
+          onHoloScreenClick={handleHoloScreenClick}
+        />
       </Canvas>
-      {selectedPlanet && (
-        <div className="holo-container">
-          <h2>{selectedPlanet}</h2>
-          <p>📊 Prix: ...</p>
-          <p>💰 MarketCap: ...</p>
-          <p>📈 Variation: ...</p>
+
+      {/* Interface de retour quand on est en mode zoom */}
+      {isZoomedToHolo && (
+        <div 
+          className="holo-back-button"
+          onClick={handleHoloScreenClick}
+        >
+         [ RETOUR ]
         </div>
       )}
     </>
