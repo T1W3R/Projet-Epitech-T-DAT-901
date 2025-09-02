@@ -31,7 +31,7 @@ const ShipWithSpotlight = ({ debug = false }: { debug?: boolean }) => {
         position={shipPos}
         rotation={[0, 135.1, 0]}
         scale={0.01}
-        useMotions={false}
+        useMotions={true}
       />
 
       {/* SpotLight dans le vaisseau visant les écrans holographiques */}
@@ -216,6 +216,7 @@ const SpaceScene = () => {
         <HoloScreen 
           selectedPlanet={selectedPlanet} 
           onHoloScreenClick={handleHoloScreenClick}
+          useMotions={true}
         />
       </Canvas>
 
