@@ -16,7 +16,7 @@ type SpaceshipProps = {
 
 // Composant pour charger le modèle FBX
 const FBXModel = () => {
-  const fbx = useLoader(FBXLoader, "/models/Spaceship_with_glass.fbx");
+  const fbx = useLoader(FBXLoader, "/models/Spaceship.fbx");
 
   // Centrer et ajuster le modèle
   const box = new THREE.Box3().setFromObject(fbx);
@@ -52,8 +52,6 @@ const Spaceship = ({
   scale = 0.01,
   rotation = [0, 0, 0],
   useMotions = true,
-  followCamera = false,
-  zOffset = 1.5,
 }: SpaceshipProps) => {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -66,11 +64,6 @@ const Spaceship = ({
 
         // Légère oscillation de position sur l'axe Y
         groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 1) * 0.05;
-      }
-
-      // Suivi simple de la caméra sur l'axe Z
-      if (followCamera) {
-        groupRef.current.position.z = state.camera.position.z + zOffset;
       }
     }
   });
