@@ -64,6 +64,9 @@ const Spaceship = ({
 
         // Légère oscillation de position sur l'axe Y
         groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 1) * 0.05;
+
+        console.log("groupRef.current.position.z", groupRef.current.position.z);
+        console.log("state.camera.position.z", state.camera.position.z);
       }
     }
   });

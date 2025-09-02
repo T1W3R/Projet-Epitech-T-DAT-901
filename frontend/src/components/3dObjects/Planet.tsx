@@ -69,7 +69,10 @@ const Planet = ({ textureUrl, name, onClick, ...props }: PlanetProps) => {
       {...props}
       ref={ref}
       scale={hovered ? 1.2 : 1}
-      onClick={() => onClick && onClick(name)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.(name);
+      }}
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
