@@ -8,7 +8,7 @@ import * as THREE from "three";
 import './SpaceScene.css';
 import HoloScreen from "./3dObjects/HoloScreen";
 
-const ShipWithSpotlight = ({ debug = false }: { debug?: boolean }) => {
+const ShipWithSpotlight = ({ debug = false, useMotion = true }: { debug?: boolean; useMotion?: boolean }) => {
   const shipPos: [number, number, number] = [0.025, 0.2, 9];
 
   const spotRef = useRef<THREE.SpotLight>(null);
@@ -31,7 +31,7 @@ const ShipWithSpotlight = ({ debug = false }: { debug?: boolean }) => {
         position={shipPos}
         rotation={[0, 135.1, 0]}
         scale={0.01}
-        useMotions={true}
+        useMotions={useMotion}
       />
 
       {/* SpotLight dans le vaisseau visant les écrans holographiques */}
@@ -126,10 +126,12 @@ const CameraController = memo(({
 // Composant de la scène 3D pure (ne se re-render JAMAIS)
 const Scene3D = memo(({ 
   onPlanetClick, 
-  debug = false
+  debug = false,
+  useMotion = true
 }: { 
   onPlanetClick: (name: string) => void;
   debug?: boolean;
+  useMotion?: boolean;
 }) => {
   const controlsRef = useRef<typeof OrbitControls>(null);
 
@@ -158,7 +160,7 @@ const Scene3D = memo(({
       <DreiStars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
 
       {/* Vaisseau + spotLight avec helpers */}
-      <ShipWithSpotlight debug={debug} />
+      <ShipWithSpotlight debug={debug} useMotion={useMotion} />
 
       {planets.map((p, idx) => (
         <Planet
@@ -190,6 +192,12 @@ const SpaceScene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   const [isZoomedToHolo, setIsZoomedToHolo] = useState(false);
   
+  // État useMotion persisté dans localStorage
+  const [useMotion, setUseMotion] = useState(() => {
+    const saved = localStorage.getItem('spaceScene-useMotion');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  
   // Stabilise la fonction pour éviter les re-renders de Scene3D
   const handlePlanetClick = useCallback((name: string) => {
     setSelectedPlanet(name);
@@ -212,23 +220,38 @@ const SpaceScene = () => {
         <Scene3D 
           onPlanetClick={handlePlanetClick} 
           debug={false}
+          useMotion={useMotion}
         />
         <HoloScreen 
           selectedPlanet={selectedPlanet} 
           onHoloScreenClick={handleHoloScreenClick}
-          useMotions={true}
+          useMotions={useMotion}
         />
       </Canvas>
 
-      {/* Interface de retour quand on est en mode zoom */}
-      {isZoomedToHolo && (
-        <div 
-          className="holo-back-button"
-          onClick={handleHoloScreenClick}
-        >
-         [ RETOUR ]
+      {/* Interface de contrôle holographique */}
+      <div className="holo-control-panel">
+        <div className="holo-control-header">[ CONTRÔLES SYSTÈME ]</div>
+        <div className="holo-control-item">
+          <label className="holo-checkbox-container">
+            <input
+              type="checkbox"
+              checked={useMotion}
+              onChange={(e) => {
+                const newValue = e.target.checked;
+                setUseMotion(newValue);
+                // Sauvegarder dans localStorage avant de recharger
+                localStorage.setItem('spaceScene-useMotion', JSON.stringify(newValue));
+                // Reload la page pour éviter les problèmes de re-render
+                window.location.reload();
+              }}
+              className="holo-checkbox"
+            />
+            <span className="holo-checkmark"></span>
+            <span className="holo-label">Motion Effects</span>
+          </label>
         </div>
-      )}
+      </div>
     </>
   );
 };
