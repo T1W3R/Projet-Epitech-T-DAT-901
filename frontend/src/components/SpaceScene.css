@@ -25,3 +25,104 @@
   z-index: 1000;
   backdrop-filter: blur(10px);
 }
+
+/* Interface de contrôle holographique */
+.holo-control-panel {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 20px;
+  background: rgba(0, 255, 255, 0.1);
+  border: 2px solid cyan;
+  border-radius: 12px;
+  color: cyan;
+  font-family: monospace;
+  min-width: 200px;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.holo-control-header {
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px cyan;
+  letter-spacing: 1px;
+}
+
+.holo-control-item {
+  margin-bottom: 10px;
+}
+
+/* Checkbox holographique personnalisée */
+.holo-checkbox-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  padding-left: 35px;
+  user-select: none;
+}
+
+.holo-checkbox {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.holo-checkmark {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 20px;
+  width: 20px;
+  background-color: transparent;
+  border: 2px solid cyan;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+/* Effet hover sur la checkbox */
+.holo-checkbox-container:hover .holo-checkmark {
+  background-color: rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Style de la checkbox cochée */
+.holo-checkbox:checked ~ .holo-checkmark {
+  background-color: rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+}
+
+/* Checkmark symbol */
+.holo-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.holo-checkbox:checked ~ .holo-checkmark:after {
+  display: block;
+}
+
+.holo-checkbox-container .holo-checkmark:after {
+  left: 4px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid cyan;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.holo-label {
+  font-size: 14px;
+  color: cyan;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+  letter-spacing: 0.5px;
+}
