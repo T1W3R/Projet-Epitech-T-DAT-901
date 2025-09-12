@@ -3,20 +3,24 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 
-const HoloScreen = ({ 
+const SmallHoloScreen = ({ 
   selectedPlanet, 
-  onHoloScreenClick,
+  onSmallHoloScreenClick,
   useMotions = false,
-  position = [0, 0, 0]
+  position = [0, 0, 0],
+  quaternion = undefined,
 }: { 
   selectedPlanet: string | null;
-  onHoloScreenClick?: () => void;
+  onSmallHoloScreenClick?: () => void;
   useMotions?: boolean;
   position?: [number, number, number];
+  quaternion?: THREE.Quaternion | undefined;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frameRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
+
+  const BASE_SCALE: [number, number, number] = [0.105, 0.10, 1];
   
   // Positions de base pour l'écran holographique
   const basePosition: [number, number, number] = position;
@@ -41,23 +45,23 @@ const HoloScreen = ({
 
     // Oscillations synchronisées avec le vaisseau
     if (groupRef.current && useMotions) {
-      // Même oscillation de rotation sur l'axe Z que le vaisseau et l'axe X
-      groupRef.current.rotation.z -= Math.sin(time * 1) * 0.0005;
-      groupRef.current.position.x -= Math.sin(time * 1) * 0.0002;
+    //   // Même oscillation de rotation sur l'axe Z que le vaisseau et l'axe X
+    //   groupRef.current.rotation.z -= Math.sin(time * 1) * 0.0005;
+    //   groupRef.current.position.x -= Math.sin(time * 1) * 0.0002;
 
-      // Même oscillation de position sur l'axe Y que le vaisseau
-      groupRef.current.position.y = basePosition[1] + Math.sin(time * 1) * 0.05;
+    //   // Même oscillation de position sur l'axe Y que le vaisseau
+    //   groupRef.current.position.y = basePosition[1] + Math.sin(time * 1) * 0.05;
     }
   });
 
   return (
-    <group ref={groupRef} position={basePosition}>
+    <group ref={groupRef} position={basePosition} quaternion={quaternion}>
       {/* Zone cliquable invisible pour toute l'interface */}
       <mesh 
         position={[0, 0, 0.01]}
         onClick={(e) => {
           e.stopPropagation();
-          onHoloScreenClick && onHoloScreenClick();
+          onSmallHoloScreenClick && onSmallHoloScreenClick();
         }}
         onPointerOver={(e) => {
           e.stopPropagation();
@@ -76,7 +80,7 @@ const HoloScreen = ({
         ref={frameRef}
         position={[0, 0, -0.01]} 
         rotation={[0, 0, 0]}
-        scale={[0.18, 0.15, 1]}
+        scale={BASE_SCALE}
       >
         <planeGeometry args={[2.7, 1.7]} />
         <meshBasicMaterial
@@ -90,9 +94,9 @@ const HoloScreen = ({
       {/* Écran holographique principal */}
       <mesh 
         ref={meshRef}
-        position={[0, 0, 0]} 
+        position={[0, 0, -0.008]} 
         rotation={[0, 0, 0]}
-        scale={[0.18, 0.15, 1]}
+        scale={BASE_SCALE}
       >
         <planeGeometry args={[2.5, 1.5]} />
         <meshBasicMaterial
@@ -126,20 +130,20 @@ const HoloScreen = ({
                 <Text 
                   position={[0, -1, 0]}
                   fontSize={0.75} 
-                  color="#ffaa00"
+                  color="#00ff00"
                   anchorX="center"
                   anchorY="middle"
                 >
-                  Variation: +2.4%
+                  Achetez
                 </Text>
                 <Text 
                   position={[0, -2, 0]}
                   fontSize={0.75} 
-                  color="#ff6600"
+                  color="#ff0000"
                   anchorX="center"
                   anchorY="middle"
                 >
-                  Volume: 2.1B $
+                  Vendre
                 </Text>
               </>
             ) : (
@@ -169,7 +173,7 @@ const HoloScreen = ({
                   anchorX="center"
                   anchorY="middle"
                 >
-                  pour afficher les données principales
+                  pour afficher des données supplémentaires
                 </Text>
               </>
             )}
@@ -180,4 +184,4 @@ const HoloScreen = ({
   );
 };
 
-export default HoloScreen;
+export default SmallHoloScreen;

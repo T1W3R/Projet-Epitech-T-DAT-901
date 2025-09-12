@@ -7,6 +7,8 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import './SpaceScene.css';
 import HoloScreen from "./3dObjects/HoloScreen";
+import { createScreenQuaternion } from "../utils/mathUtils";
+import SmallHoloScreen from "./3dObjects/SmallHoloScreen";
 
 const ShipWithSpotlight = ({ debug = false, useMotion = true }: { debug?: boolean; useMotion?: boolean }) => {
   const shipPos: [number, number, number] = [0.025, 0.2, 9];
@@ -211,21 +213,34 @@ const SpaceScene = () => {
     setIsZoomedToHolo(!isZoomedRef.current);
   }, []);
 
+  const handleSmallHoloScreenClick = useCallback(() => {
+    // setIsZoomedToHolo(!isZoomedRef.current);
+    console.log("SmallHoloScreen clicked");
+  }, []);
+
   return (
     <>
       <Canvas camera={{ position: [0, 0, 8], fov: 60, near: 0.1, far: 500 }}>
         {/* Contrôleur d'animation de caméra (indépendant de la scène) */}
-        <CameraController isZoomedToHolo={isZoomedToHolo} />
+        {/* <CameraController isZoomedToHolo={isZoomedToHolo} /> */}
         
         <Scene3D 
           onPlanetClick={handlePlanetClick} 
-          debug={false}
+          debug={true}
           useMotion={useMotion}
         />
         <HoloScreen 
           selectedPlanet={selectedPlanet} 
           onHoloScreenClick={handleHoloScreenClick}
           useMotions={useMotion}
+          position={[-0.01, -0.21, 6.24]}
+        />
+        <SmallHoloScreen 
+          selectedPlanet={selectedPlanet} 
+          onSmallHoloScreenClick={handleSmallHoloScreenClick}
+          useMotions={useMotion}
+          position={[0.418, -0.275, 6.478]}
+          quaternion={createScreenQuaternion(-29.8, -58)}
         />
       </Canvas>
 
