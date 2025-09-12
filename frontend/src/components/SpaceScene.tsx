@@ -1,23 +1,22 @@
 import { Canvas } from "@react-three/fiber";
-import { Stars as DreiStars, OrbitControls, useHelper } from "@react-three/drei";
+import { Stars as DreiStars, OrbitControls } from "@react-three/drei";
 import Planet from "./3dObjects/Planet";
 import Spaceship from "./3dObjects/Spaceship";
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+// import { useFrame, useThree } from "@react-three/fiber"; // Utilisés dans le code commenté (CameraController)
 import * as THREE from "three";
 import './SpaceScene.css';
 import HoloScreen from "./3dObjects/HoloScreen";
 import { createScreenQuaternion } from "../utils/mathUtils";
 import SmallHoloScreen from "./3dObjects/SmallHoloScreen";
+import EditableObject from "../utils/EditableObject";
 
-const ShipWithSpotlight = ({ debug = false, useMotion = true }: { debug?: boolean; useMotion?: boolean }) => {
+
+const ShipWithSpotlight = ({ useMotion = true }: { useMotion?: boolean }) => {
   const shipPos: [number, number, number] = [0.025, 0.2, 9];
 
   const spotRef = useRef<THREE.SpotLight>(null);
   const targetRef = useRef<THREE.Object3D>(null);
-  if (debug) {
-    useHelper(spotRef as any, THREE.SpotLightHelper, "cyan");
-  }
 
   useEffect(() => {
     if (!spotRef.current || !targetRef.current) return;
@@ -35,7 +34,6 @@ const ShipWithSpotlight = ({ debug = false, useMotion = true }: { debug?: boolea
         scale={0.01}
         useMotions={useMotion}
       />
-
       {/* SpotLight dans le vaisseau visant les écrans holographiques */}
       <spotLight
         ref={spotRef}
@@ -56,7 +54,8 @@ const ShipWithSpotlight = ({ debug = false, useMotion = true }: { debug?: boolea
   );
 };
 
-// Composant pour gérer l'animation de la caméra
+// Composant pour gérer l'animation de la caméra (désactivé)
+/*
 const CameraController = memo(({ 
   isZoomedToHolo, 
   onZoomComplete 
@@ -124,8 +123,9 @@ const CameraController = memo(({
 
   return null;
 });
+*/
 
-// Composant de la scène 3D pure (ne se re-render JAMAIS)
+// Composant de la scène 3D pure (ne se re-render JAMAIS !)
 const Scene3D = memo(({ 
   onPlanetClick, 
   debug = false,
@@ -162,7 +162,7 @@ const Scene3D = memo(({
       <DreiStars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
 
       {/* Vaisseau + spotLight avec helpers */}
-      <ShipWithSpotlight debug={debug} useMotion={useMotion} />
+      <ShipWithSpotlight useMotion={useMotion} />
 
       {planets.map((p, idx) => (
         <Planet
@@ -194,10 +194,17 @@ const SpaceScene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   const [isZoomedToHolo, setIsZoomedToHolo] = useState(false);
   
-  // État useMotion persisté dans localStorage
-  const [useMotion, setUseMotion] = useState(() => {
-    const saved = localStorage.getItem('spaceScene-useMotion');
-    return saved !== null ? JSON.parse(saved) : true;
+  // États pour le mode édition des écrans
+  const [isEditMode, setIsEditMode] = useState(true);
+  const [transformMode, setTransformMode] = useState<"translate" | "rotate" | "scale">("translate");
+  const [selectedScreen, setSelectedScreen] = useState<"mainHolo" | "smallRightHolo" | null>(null);
+  const [screenPositions, setScreenPositions] = useState({
+    mainHolo: [-0.01, -0.21, 6.24] as [number, number, number],
+    smallRightHolo: [0.424, -0.278, 6.475] as [number, number, number]
+  });
+  const [screenRotations, setScreenRotations] = useState({
+    mainHolo: [0, 0, 0] as [number, number, number],
+    smallRightHolo: [0, 0, 0] as [number, number, number]
   });
   
   // Stabilise la fonction pour éviter les re-renders de Scene3D
@@ -214,8 +221,8 @@ const SpaceScene = () => {
   }, []);
 
   const handleSmallHoloScreenClick = useCallback(() => {
-    // setIsZoomedToHolo(!isZoomedRef.current);
-    console.log("SmallHoloScreen clicked");
+    // setIsZoomedToHolo(!isZoomedRef.current); //TODO: Create the animation to zoom to the small right holo screen
+    console.log("SmallRightHoloScreen clicked");
   }, []);
 
   return (
@@ -227,45 +234,122 @@ const SpaceScene = () => {
         <Scene3D 
           onPlanetClick={handlePlanetClick} 
           debug={true}
-          useMotion={useMotion}
+          useMotion={false}
         />
-        <HoloScreen 
-          selectedPlanet={selectedPlanet} 
-          onHoloScreenClick={handleHoloScreenClick}
-          useMotions={useMotion}
-          position={[-0.01, -0.21, 6.24]}
-        />
-        <SmallHoloScreen 
-          selectedPlanet={selectedPlanet} 
-          onSmallHoloScreenClick={handleSmallHoloScreenClick}
-          useMotions={useMotion}
-          position={[0.418, -0.275, 6.478]}
-          quaternion={createScreenQuaternion(-29.8, -58)}
-        />
+        <EditableObject 
+          isEditing={isEditMode}
+          isSelected={selectedScreen === "mainHolo"}
+          transformMode={transformMode}
+          initialPosition={screenPositions.mainHolo}
+          onSelect={() => setSelectedScreen("mainHolo")}
+          onPositionChange={(pos) => setScreenPositions(prev => ({ ...prev, mainHolo: pos }))}
+          onRotationChange={(rot) => setScreenRotations(prev => ({ ...prev, mainHolo: rot }))}
+        >
+          <HoloScreen 
+            selectedPlanet={selectedPlanet} 
+            onHoloScreenClick={handleHoloScreenClick}
+            useMotions={false}
+            position={[0, 0, 0]} // Position relative dans le groupe parent
+          />
+        </EditableObject>
+        
+        <EditableObject 
+          isEditing={isEditMode}
+          isSelected={selectedScreen === "smallRightHolo"}
+          transformMode={transformMode}
+          initialPosition={screenPositions.smallRightHolo}
+          onSelect={() => setSelectedScreen("smallRightHolo")}
+          onPositionChange={(pos) => setScreenPositions(prev => ({ ...prev, smallRightHolo: pos }))}
+          onRotationChange={(rot) => setScreenRotations(prev => ({ ...prev, smallRightHolo: rot }))}
+        >
+          <SmallHoloScreen 
+            selectedPlanet={selectedPlanet} 
+            onSmallHoloScreenClick={handleSmallHoloScreenClick}
+            useMotions={false}
+            position={[0, 0, 0]} // Position relative dans le groupe parent
+            quaternion={createScreenQuaternion(-29.9, -59.5)}
+          />
+        </EditableObject>
       </Canvas>
 
       {/* Interface de contrôle holographique */}
       <div className="holo-control-panel">
         <div className="holo-control-header">[ CONTRÔLES SYSTÈME ]</div>
+
+        {/* Mode Édition */}
         <div className="holo-control-item">
           <label className="holo-checkbox-container">
             <input
               type="checkbox"
-              checked={useMotion}
-              onChange={(e) => {
-                const newValue = e.target.checked;
-                setUseMotion(newValue);
-                // Sauvegarder dans localStorage avant de recharger
-                localStorage.setItem('spaceScene-useMotion', JSON.stringify(newValue));
-                // Reload la page pour éviter les problèmes de re-render
-                window.location.reload();
-              }}
+              checked={isEditMode}
+              onChange={(e) => setIsEditMode(e.target.checked)}
               className="holo-checkbox"
             />
             <span className="holo-checkmark"></span>
-            <span className="holo-label">Motion Effects</span>
+            <span className="holo-label">🛠️ Edit Mode</span>
           </label>
         </div>
+
+        {/* Sélecteur d'écran à éditer */}
+        {isEditMode && (
+          <div className="holo-control-item">
+            <span className="holo-label">Écran sélectionné:</span>
+            <select 
+              value={selectedScreen || ""} 
+              onChange={(e) => setSelectedScreen(e.target.value as "mainHolo" | "smallRightHolo" || null)}
+              className="holo-select-screen"
+            >
+              <option value="">Aucun</option>
+              <option value="mainHolo">🖥️ Écran Principal</option>
+              <option value="smallRightHolo">📱 Petit Écran Droite</option>
+            </select>
+          </div>
+        )}
+
+        {/* Sélecteur de mode de transformation */}
+        {isEditMode && selectedScreen && (
+          <div className="holo-control-item">
+            <span className="holo-label">Transform Mode:</span>
+            <select 
+              value={transformMode} 
+              onChange={(e) => setTransformMode(e.target.value as "translate" | "rotate" | "scale")}
+              className="holo-select-transform"
+            >
+              <option value="translate">📍 Move</option>
+              <option value="rotate">🔄 Rotate</option>
+              <option value="scale">📏 Scale</option>
+            </select>
+          </div>
+        )}
+
+        {/* Affichage des coordonnées de l'écran sélectionné */}
+        {isEditMode && selectedScreen && (
+          <div className="holo-control-item holo-coordinates-display">
+            <div>📍 Position: [{screenPositions[selectedScreen].map(x => x.toFixed(3)).join(', ')}]</div>
+            <div>🔄 Rotation: [{screenRotations[selectedScreen].map(x => x.toFixed(3)).join(', ')}]</div>
+          </div>
+        )}
+
+        {/* Bouton pour copier les coordonnées */}
+        {isEditMode && selectedScreen && (
+          <div className="holo-control-item">
+            <button 
+              onClick={() => {
+                const pos = screenPositions[selectedScreen];
+                const rot = screenRotations[selectedScreen];
+                const code = `// ${selectedScreen === 'mainHolo' ? 'Écran Principal' : 'Petit Écran'}
+position: [${pos.map(x => x.toFixed(3)).join(', ')}],
+rotation: [${rot.map(x => x.toFixed(3)).join(', ')}]`;
+                navigator.clipboard.writeText(code);
+                console.log('📋 Coordonnées copiées dans le presse-papier !', code);
+                alert('📋 Coordonnées copiées !');
+              }}
+              className="holo-copy-button"
+            >
+              📋 Copy Position
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

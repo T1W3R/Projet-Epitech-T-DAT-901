@@ -126,3 +126,52 @@
   text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
   letter-spacing: 0.5px;
 }
+
+/* Sélecteurs de l'interface d'édition */
+.holo-select-screen {
+  background-color: rgba(22, 48, 48, 0.9);
+  border: 1px solid cyan;
+  color: cyan;
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.holo-select-transform {
+  background-color: rgba(22, 48, 48, 0.9);
+  border: 1px solid cyan;
+  color: cyan;
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+/* Affichage des coordonnées */
+.holo-coordinates-display {
+  font-size: 12px;
+  color: #aaa;
+  font-family: monospace;
+}
+
+/* Bouton de copie des positions */
+.holo-copy-button {
+  background-color: rgba(0, 255, 255, 0.2);
+  border: 1px solid cyan;
+  color: cyan;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: monospace;
+  transition: all 0.3s ease;
+}
+
+.holo-copy-button:hover {
+  background-color: rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
