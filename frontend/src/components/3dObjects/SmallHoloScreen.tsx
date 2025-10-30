@@ -1,4 +1,4 @@
-import { RenderTexture, Text } from "@react-three/drei";
+import { RenderTexture, Text, PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
@@ -105,6 +105,7 @@ const SmallHoloScreen = ({
           side={THREE.DoubleSide}
         >
           <RenderTexture attach="map" anisotropy={16}>
+            <PerspectiveCamera makeDefault position={[0, 0, 10]} />
             <color attach="background" args={["#000a1a"]} />
             <ambientLight intensity={0.8} />
             {selectedPlanet ? (
