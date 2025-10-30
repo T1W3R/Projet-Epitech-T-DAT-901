@@ -3,7 +3,7 @@ import { Stars as DreiStars, OrbitControls } from "@react-three/drei";
 import Planet from "./3dObjects/Planet";
 import Spaceship from "./3dObjects/Spaceship";
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
-// import { useFrame, useThree } from "@react-three/fiber"; // Utilisés dans le code commenté (CameraController)
+import { useFrame, useThree } from "@react-three/fiber"; // Utilisés dans le code commenté (CameraController)
 import * as THREE from "three";
 import './SpaceScene.css';
 import HoloScreen from "./3dObjects/HoloScreen";
@@ -55,12 +55,12 @@ const ShipWithSpotlight = ({ useMotion = true }: { useMotion?: boolean }) => {
 };
 
 // Composant pour gérer l'animation de la caméra (désactivé)
-/*
+
 const CameraController = memo(({ 
-  isZoomedToHolo, 
+  zoomTarget,
   onZoomComplete 
 }: { 
-  isZoomedToHolo: boolean;
+  zoomTarget: 'none' | 'mainHolo' | 'smallHolo';
   onZoomComplete?: () => void;
 }) => {
   const { camera } = useThree();
@@ -70,37 +70,67 @@ const CameraController = memo(({
     startLookAt: new THREE.Vector3(),
     targetPos: new THREE.Vector3(),
     targetLookAt: new THREE.Vector3(),
-    progress: 0
+    progress: 0,
+    currentTarget: 'none' as 'none' | 'mainHolo' | 'smallHolo'
   });
 
   // Positions fixes pour éviter les problèmes de mutation (une seule fois)
   const positionsRef = useRef({
     HOLO_POSITION: new THREE.Vector3(-0.01, -0.21, 6.8),
     HOLO_LOOK_AT: new THREE.Vector3(-0.01, -0.21, 6.24),
+    SMALL_HOLO_POSITION: new THREE.Vector3(),
+    SMALL_HOLO_LOOK_AT: new THREE.Vector3(0.424, -0.278, 6.475),
     MAIN_POSITION: new THREE.Vector3(0, 0, 8),
     MAIN_LOOK_AT: new THREE.Vector3(0, 0, 0)
   });
-  const { HOLO_POSITION, HOLO_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
+  
+  // Calculer la position de la caméra pour le petit écran incliné
+  useEffect(() => {
+    const screenPos = new THREE.Vector3(0.424, -0.278, 6.475);
+    const quaternion = createScreenQuaternion(-29.9, -59.5);
+    
+    // Créer un vecteur normal à l'écran (direction Z positive en local)
+    const normal = new THREE.Vector3(0, 0, 1);
+    normal.applyQuaternion(quaternion);
+    
+    // Placer la caméra à une distance devant l'écran
+    const cameraDistance = 0.45;
+    const cameraPos = screenPos.clone().add(normal.multiplyScalar(cameraDistance));
+    
+    positionsRef.current.SMALL_HOLO_POSITION.copy(cameraPos);
+  }, []);
+
+  const { HOLO_POSITION, HOLO_LOOK_AT, SMALL_HOLO_POSITION, SMALL_HOLO_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
 
   useFrame((_, delta) => {
     const anim = animationRef.current;
     
-    if (isZoomedToHolo && !anim.isAnimating && camera.position.distanceTo(HOLO_POSITION) > 0.1) {
-      // Commencer l'animation vers l'écran holo
+    // Détecter un changement de target
+    if (zoomTarget !== anim.currentTarget && !anim.isAnimating) {
       anim.isAnimating = true;
       anim.startPos.copy(camera.position);
-      anim.startLookAt.copy(MAIN_LOOK_AT);
-      anim.targetPos.copy(HOLO_POSITION);
-      anim.targetLookAt.copy(HOLO_LOOK_AT);
       anim.progress = 0;
-    } else if (!isZoomedToHolo && !anim.isAnimating && camera.position.distanceTo(MAIN_POSITION) > 0.1) {
-      // Commencer l'animation de retour
-      anim.isAnimating = true;
-      anim.startPos.copy(camera.position);
-      anim.startLookAt.copy(HOLO_LOOK_AT);
-      anim.targetPos.copy(MAIN_POSITION);
-      anim.targetLookAt.copy(MAIN_LOOK_AT);
-      anim.progress = 0;
+      
+      // Définir la destination selon la nouvelle target
+      switch (zoomTarget) {
+        case 'mainHolo':
+          anim.targetPos.copy(HOLO_POSITION);
+          anim.targetLookAt.copy(HOLO_LOOK_AT);
+          anim.startLookAt.copy(anim.currentTarget === 'smallHolo' ? SMALL_HOLO_LOOK_AT : MAIN_LOOK_AT);
+          break;
+        case 'smallHolo':
+          anim.targetPos.copy(SMALL_HOLO_POSITION);
+          anim.targetLookAt.copy(SMALL_HOLO_LOOK_AT);
+          anim.startLookAt.copy(anim.currentTarget === 'mainHolo' ? HOLO_LOOK_AT : MAIN_LOOK_AT);
+          break;
+        case 'none':
+          anim.targetPos.copy(MAIN_POSITION);
+          anim.targetLookAt.copy(MAIN_LOOK_AT);
+          anim.startLookAt.copy(anim.currentTarget === 'mainHolo' ? HOLO_LOOK_AT : SMALL_HOLO_LOOK_AT);
+          break;
+      }
+      
+      anim.currentTarget = zoomTarget;
     }
 
     if (anim.isAnimating) {
@@ -109,7 +139,7 @@ const CameraController = memo(({
       if (anim.progress >= 1) {
         anim.progress = 1;
         anim.isAnimating = false;
-        console.log("✅ Animation terminée, isZoomedToHolo:", isZoomedToHolo);
+        console.log("✅ Animation terminée, zoomTarget:", zoomTarget);
         onZoomComplete && onZoomComplete();
       }
       
@@ -118,12 +148,16 @@ const CameraController = memo(({
       
       // Position de la caméra
       camera.position.lerpVectors(anim.startPos, anim.targetPos, t);
+      
+      // Orientation de la caméra (lookAt interpolé)
+      const currentLookAt = new THREE.Vector3().lerpVectors(anim.startLookAt, anim.targetLookAt, t);
+      camera.lookAt(currentLookAt);
     }
   });
 
   return null;
 });
-*/
+
 
 // Composant de la scène 3D pure (ne se re-render JAMAIS !)
 const Scene3D = memo(({ 
@@ -192,7 +226,7 @@ const Scene3D = memo(({
 // Composant principal avec le state (seul le HUD se re-render)
 const SpaceScene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
-  const [isZoomedToHolo, setIsZoomedToHolo] = useState(false);
+  const [zoomTarget, setZoomTarget] = useState<'none' | 'mainHolo' | 'smallHolo'>('none');
   
   // États pour le mode édition des écrans
   const [isEditMode, setIsEditMode] = useState(true);
@@ -212,28 +246,28 @@ const SpaceScene = () => {
     setSelectedPlanet(name);
   }, []);
 
-  // Gestionnaire pour le clic sur l'écran holographique (stabilisé avec ref)
-  const isZoomedRef = useRef(isZoomedToHolo);
-  isZoomedRef.current = isZoomedToHolo;
+  // Gestionnaire pour le clic sur l'écran holographique principal (stabilisé avec ref)
+  const zoomTargetRef = useRef(zoomTarget);
+  zoomTargetRef.current = zoomTarget;
   
   const handleHoloScreenClick = useCallback(() => {
-    setIsZoomedToHolo(!isZoomedRef.current);
+    setZoomTarget(prev => prev === 'mainHolo' ? 'none' : 'mainHolo');
   }, []);
 
   const handleSmallHoloScreenClick = useCallback(() => {
-    // setIsZoomedToHolo(!isZoomedRef.current); //TODO: Create the animation to zoom to the small right holo screen
-    console.log("SmallRightHoloScreen clicked");
+    setZoomTarget(prev => prev === 'smallHolo' ? 'none' : 'smallHolo');
+    console.log("SmallRightHoloScreen clicked - Animation de zoom");
   }, []);
 
   return (
     <>
       <Canvas camera={{ position: [0, 0, 8], fov: 60, near: 0.1, far: 500 }}>
         {/* Contrôleur d'animation de caméra (indépendant de la scène) */}
-        {/* <CameraController isZoomedToHolo={isZoomedToHolo} /> */}
+        <CameraController zoomTarget={zoomTarget} />
         
         <Scene3D 
           onPlanetClick={handlePlanetClick} 
-          debug={true}
+          debug={false}
           useMotion={false}
         />
         <EditableObject 
