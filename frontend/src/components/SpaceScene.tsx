@@ -11,6 +11,7 @@ import { createScreenQuaternion } from "../utils/mathUtils";
 import SmallHoloScreen from "./3dObjects/SmallHoloScreen";
 import AltcoinMetricsScreen from "./3dObjects/AltcoinMetricsScreen";
 import CryptoDetailsScreen from "./3dObjects/CryptoDetailsScreen";
+import BitcoinDominanceScreen from "./3dObjects/BitcoinDominanceScreen";
 import EditableObject from "../utils/EditableObject";
 
 
@@ -62,7 +63,7 @@ const CameraController = memo(({
   zoomTarget,
   onZoomComplete 
 }: { 
-  zoomTarget: 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics' | 'cryptoDetails';
+  zoomTarget: 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics' | 'cryptoDetails' | 'btcDominance';
   onZoomComplete?: () => void;
 }) => {
   const { camera } = useThree();
@@ -73,7 +74,7 @@ const CameraController = memo(({
     targetPos: new THREE.Vector3(),
     targetLookAt: new THREE.Vector3(),
     progress: 0,
-    currentTarget: 'none' as 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics' | 'cryptoDetails'
+    currentTarget: 'none' as 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics' | 'cryptoDetails' | 'btcDominance'
   });
 
   // Positions fixes pour éviter les problèmes de mutation (une seule fois)
@@ -86,6 +87,8 @@ const CameraController = memo(({
     ALTCOIN_METRICS_LOOK_AT: new THREE.Vector3(0.593, -0.277, 6.755),
     CRYPTO_DETAILS_POSITION: new THREE.Vector3(),
     CRYPTO_DETAILS_LOOK_AT: new THREE.Vector3(-0.435, -0.274, 6.490),
+    BTC_DOMINANCE_POSITION: new THREE.Vector3(),
+    BTC_DOMINANCE_LOOK_AT: new THREE.Vector3(-0.598, -0.277, 6.768),
     MAIN_POSITION: new THREE.Vector3(0, 0, 8),
     MAIN_LOOK_AT: new THREE.Vector3(0, 0, 0)
   });
@@ -127,9 +130,21 @@ const CameraController = memo(({
     const cryptoDetailsCameraPos = cryptoDetailsScreenPos.clone().add(cryptoDetailsNormal.multiplyScalar(cryptoDetailsCameraDistance));
     
     positionsRef.current.CRYPTO_DETAILS_POSITION.copy(cryptoDetailsCameraPos);
+    
+    // Bitcoin Dominance Screen (en haut à gauche)
+    const btcDominanceScreenPos = new THREE.Vector3(-0.598, -0.277, 6.768);
+    const btcDominanceQuaternion = createScreenQuaternion(-29.9, 59.9);
+    
+    const btcDominanceNormal = new THREE.Vector3(0, 0, 1);
+    btcDominanceNormal.applyQuaternion(btcDominanceQuaternion);
+    
+    const btcDominanceCameraDistance = 0.45;
+    const btcDominanceCameraPos = btcDominanceScreenPos.clone().add(btcDominanceNormal.multiplyScalar(btcDominanceCameraDistance));
+    
+    positionsRef.current.BTC_DOMINANCE_POSITION.copy(btcDominanceCameraPos);
   }, []);
 
-  const { HOLO_POSITION, HOLO_LOOK_AT, SMALL_HOLO_POSITION, SMALL_HOLO_LOOK_AT, ALTCOIN_METRICS_POSITION, ALTCOIN_METRICS_LOOK_AT, CRYPTO_DETAILS_POSITION, CRYPTO_DETAILS_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
+  const { HOLO_POSITION, HOLO_LOOK_AT, SMALL_HOLO_POSITION, SMALL_HOLO_LOOK_AT, ALTCOIN_METRICS_POSITION, ALTCOIN_METRICS_LOOK_AT, CRYPTO_DETAILS_POSITION, CRYPTO_DETAILS_LOOK_AT, BTC_DOMINANCE_POSITION, BTC_DOMINANCE_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
 
   useFrame((_, delta) => {
     const anim = animationRef.current;
@@ -151,6 +166,8 @@ const CameraController = memo(({
             anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
           } else if (anim.currentTarget === 'cryptoDetails') {
             anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
+          } else if (anim.currentTarget === 'btcDominance') {
+            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
           } else {
             anim.startLookAt.copy(MAIN_LOOK_AT);
           }
@@ -164,6 +181,8 @@ const CameraController = memo(({
             anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
           } else if (anim.currentTarget === 'cryptoDetails') {
             anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
+          } else if (anim.currentTarget === 'btcDominance') {
+            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
           } else {
             anim.startLookAt.copy(MAIN_LOOK_AT);
           }
@@ -177,6 +196,8 @@ const CameraController = memo(({
             anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
           } else if (anim.currentTarget === 'cryptoDetails') {
             anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
+          } else if (anim.currentTarget === 'btcDominance') {
+            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
           } else {
             anim.startLookAt.copy(MAIN_LOOK_AT);
           }
@@ -190,6 +211,23 @@ const CameraController = memo(({
             anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
           } else if (anim.currentTarget === 'altcoinMetrics') {
             anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
+          } else if (anim.currentTarget === 'btcDominance') {
+            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
+          } else {
+            anim.startLookAt.copy(MAIN_LOOK_AT);
+          }
+          break;
+        case 'btcDominance':
+          anim.targetPos.copy(BTC_DOMINANCE_POSITION);
+          anim.targetLookAt.copy(BTC_DOMINANCE_LOOK_AT);
+          if (anim.currentTarget === 'mainHolo') {
+            anim.startLookAt.copy(HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'smallHolo') {
+            anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'altcoinMetrics') {
+            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
+          } else if (anim.currentTarget === 'cryptoDetails') {
+            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
           } else {
             anim.startLookAt.copy(MAIN_LOOK_AT);
           }
@@ -205,6 +243,8 @@ const CameraController = memo(({
             anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
           } else if (anim.currentTarget === 'cryptoDetails') {
             anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
+          } else if (anim.currentTarget === 'btcDominance') {
+            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
           } else {
             anim.startLookAt.copy(MAIN_LOOK_AT);
           }
@@ -307,23 +347,25 @@ const Scene3D = memo(({
 // Composant principal avec le state (seul le HUD se re-render)
 const SpaceScene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
-  const [zoomTarget, setZoomTarget] = useState<'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics' | 'cryptoDetails'>('none');
+  const [zoomTarget, setZoomTarget] = useState<'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics' | 'cryptoDetails' | 'btcDominance'>('none');
   
   // États pour le mode édition des écrans
   const [isEditMode, setIsEditMode] = useState(true);
   const [transformMode, setTransformMode] = useState<"translate" | "rotate" | "scale">("translate");
-  const [selectedScreen, setSelectedScreen] = useState<"mainHolo" | "smallRightHolo" | "altcoinMetrics" | "cryptoDetails" | null>(null);
+  const [selectedScreen, setSelectedScreen] = useState<"mainHolo" | "smallRightHolo" | "altcoinMetrics" | "cryptoDetails" | "btcDominance" | null>(null);
   const [screenPositions, setScreenPositions] = useState({
     mainHolo: [-0.01, -0.21, 6.24] as [number, number, number],
     smallRightHolo: [0.424, -0.278, 6.475] as [number, number, number],
     altcoinMetrics: [0.593, -0.277, 6.755] as [number, number, number],
-    cryptoDetails: [-0.435, -0.274, 6.490] as [number, number, number]
+    cryptoDetails: [-0.435, -0.274, 6.490] as [number, number, number],
+    btcDominance: [-0.597, -0.277, 6.772] as [number, number, number]
   });
   const [screenRotations, setScreenRotations] = useState({
     mainHolo: [0, 0, 0] as [number, number, number],
     smallRightHolo: [0, 0, 0] as [number, number, number],
     altcoinMetrics: [0, 0, 0] as [number, number, number],
-    cryptoDetails: [0, 0, 0] as [number, number, number]
+    cryptoDetails: [0, 0, 0] as [number, number, number],
+    btcDominance: [0, 0, 0] as [number, number, number]
   });
   
   // Stabilise la fonction pour éviter les re-renders de Scene3D
@@ -352,6 +394,11 @@ const SpaceScene = () => {
   const handleCryptoDetailsScreenClick = useCallback(() => {
     setZoomTarget(prev => prev === 'cryptoDetails' ? 'none' : 'cryptoDetails');
     console.log("CryptoDetailsScreen clicked - Animation de zoom");
+  }, []);
+
+  const handleBtcDominanceScreenClick = useCallback(() => {
+    setZoomTarget(prev => prev === 'btcDominance' ? 'none' : 'btcDominance');
+    console.log("BitcoinDominanceScreen clicked - Animation de zoom");
   }, []);
 
   return (
@@ -435,6 +482,23 @@ const SpaceScene = () => {
             quaternion={createScreenQuaternion(-29.9, 59.9)}
           />
         </EditableObject>
+        
+        <EditableObject 
+          isEditing={isEditMode}
+          isSelected={selectedScreen === "btcDominance"}
+          transformMode={transformMode}
+          initialPosition={screenPositions.btcDominance}
+          onSelect={() => setSelectedScreen("btcDominance")}
+          onPositionChange={(pos) => setScreenPositions(prev => ({ ...prev, btcDominance: pos }))}
+          onRotationChange={(rot) => setScreenRotations(prev => ({ ...prev, btcDominance: rot }))}
+        >
+          <BitcoinDominanceScreen 
+            onScreenClick={handleBtcDominanceScreenClick}
+            useMotions={false}
+            position={[0, 0, 0]} // Position relative dans le groupe parent
+            quaternion={createScreenQuaternion(-29.9, 60)}
+          />
+        </EditableObject>
       </Canvas>
 
       {/* Interface de contrôle holographique */}
@@ -461,7 +525,7 @@ const SpaceScene = () => {
             <span className="holo-label">Écran sélectionné:</span>
             <select 
               value={selectedScreen || ""} 
-              onChange={(e) => setSelectedScreen(e.target.value as "mainHolo" | "smallRightHolo" | "altcoinMetrics" | "cryptoDetails" || null)}
+              onChange={(e) => setSelectedScreen(e.target.value as "mainHolo" | "smallRightHolo" | "altcoinMetrics" | "cryptoDetails" | "btcDominance" || null)}
               className="holo-select-screen"
             >
               <option value="">Aucun</option>
@@ -469,6 +533,7 @@ const SpaceScene = () => {
               <option value="smallRightHolo">📱 Petit Écran Droite</option>
               <option value="altcoinMetrics">📊 Altcoin Metrics</option>
               <option value="cryptoDetails">💰 Crypto Details</option>
+              <option value="btcDominance">₿ BTC Dominance</option>
             </select>
           </div>
         )}
