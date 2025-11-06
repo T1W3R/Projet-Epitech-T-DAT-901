@@ -9,6 +9,7 @@ import './SpaceScene.css';
 import HoloScreen from "./3dObjects/HoloScreen";
 import { createScreenQuaternion } from "../utils/mathUtils";
 import SmallHoloScreen from "./3dObjects/SmallHoloScreen";
+import AltcoinMetricsScreen from "./3dObjects/AltcoinMetricsScreen";
 import EditableObject from "../utils/EditableObject";
 
 
@@ -60,7 +61,7 @@ const CameraController = memo(({
   zoomTarget,
   onZoomComplete 
 }: { 
-  zoomTarget: 'none' | 'mainHolo' | 'smallHolo';
+  zoomTarget: 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics';
   onZoomComplete?: () => void;
 }) => {
   const { camera } = useThree();
@@ -71,7 +72,7 @@ const CameraController = memo(({
     targetPos: new THREE.Vector3(),
     targetLookAt: new THREE.Vector3(),
     progress: 0,
-    currentTarget: 'none' as 'none' | 'mainHolo' | 'smallHolo'
+    currentTarget: 'none' as 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics'
   });
 
   // Positions fixes pour éviter les problèmes de mutation (une seule fois)
@@ -80,27 +81,40 @@ const CameraController = memo(({
     HOLO_LOOK_AT: new THREE.Vector3(-0.01, -0.21, 6.24),
     SMALL_HOLO_POSITION: new THREE.Vector3(),
     SMALL_HOLO_LOOK_AT: new THREE.Vector3(0.424, -0.278, 6.475),
+    ALTCOIN_METRICS_POSITION: new THREE.Vector3(),
+    ALTCOIN_METRICS_LOOK_AT: new THREE.Vector3(0.593, -0.277, 6.755),
     MAIN_POSITION: new THREE.Vector3(0, 0, 8),
     MAIN_LOOK_AT: new THREE.Vector3(0, 0, 0)
   });
   
-  // Calculer la position de la caméra pour le petit écran incliné
+  // Calculer les positions de la caméra pour les écrans inclinés
   useEffect(() => {
-    const screenPos = new THREE.Vector3(0.424, -0.278, 6.475);
-    const quaternion = createScreenQuaternion(-29.9, -59.5);
+    // Small Holo Screen (écran de droite)
+    const smallScreenPos = new THREE.Vector3(0.424, -0.278, 6.475);
+    const smallQuaternion = createScreenQuaternion(-29.9, -59.5);
     
-    // Créer un vecteur normal à l'écran (direction Z positive en local)
-    const normal = new THREE.Vector3(0, 0, 1);
-    normal.applyQuaternion(quaternion);
+    const smallNormal = new THREE.Vector3(0, 0, 1);
+    smallNormal.applyQuaternion(smallQuaternion);
     
-    // Placer la caméra à une distance devant l'écran
-    const cameraDistance = 0.45;
-    const cameraPos = screenPos.clone().add(normal.multiplyScalar(cameraDistance));
+    const smallCameraDistance = 0.45;
+    const smallCameraPos = smallScreenPos.clone().add(smallNormal.multiplyScalar(smallCameraDistance));
     
-    positionsRef.current.SMALL_HOLO_POSITION.copy(cameraPos);
+    positionsRef.current.SMALL_HOLO_POSITION.copy(smallCameraPos);
+    
+    // Altcoin Metrics Screen (écran de gauche)
+    const altcoinScreenPos = new THREE.Vector3(0.593, -0.277, 6.755);
+    const altcoinQuaternion = createScreenQuaternion(-29.9, -59.5);
+    
+    const altcoinNormal = new THREE.Vector3(0, 0, 1);
+    altcoinNormal.applyQuaternion(altcoinQuaternion);
+    
+    const altcoinCameraDistance = 0.45;
+    const altcoinCameraPos = altcoinScreenPos.clone().add(altcoinNormal.multiplyScalar(altcoinCameraDistance));
+    
+    positionsRef.current.ALTCOIN_METRICS_POSITION.copy(altcoinCameraPos);
   }, []);
 
-  const { HOLO_POSITION, HOLO_LOOK_AT, SMALL_HOLO_POSITION, SMALL_HOLO_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
+  const { HOLO_POSITION, HOLO_LOOK_AT, SMALL_HOLO_POSITION, SMALL_HOLO_LOOK_AT, ALTCOIN_METRICS_POSITION, ALTCOIN_METRICS_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
 
   useFrame((_, delta) => {
     const anim = animationRef.current;
@@ -116,17 +130,48 @@ const CameraController = memo(({
         case 'mainHolo':
           anim.targetPos.copy(HOLO_POSITION);
           anim.targetLookAt.copy(HOLO_LOOK_AT);
-          anim.startLookAt.copy(anim.currentTarget === 'smallHolo' ? SMALL_HOLO_LOOK_AT : MAIN_LOOK_AT);
+          if (anim.currentTarget === 'smallHolo') {
+            anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'altcoinMetrics') {
+            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
+          } else {
+            anim.startLookAt.copy(MAIN_LOOK_AT);
+          }
           break;
         case 'smallHolo':
           anim.targetPos.copy(SMALL_HOLO_POSITION);
           anim.targetLookAt.copy(SMALL_HOLO_LOOK_AT);
-          anim.startLookAt.copy(anim.currentTarget === 'mainHolo' ? HOLO_LOOK_AT : MAIN_LOOK_AT);
+          if (anim.currentTarget === 'mainHolo') {
+            anim.startLookAt.copy(HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'altcoinMetrics') {
+            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
+          } else {
+            anim.startLookAt.copy(MAIN_LOOK_AT);
+          }
+          break;
+        case 'altcoinMetrics':
+          anim.targetPos.copy(ALTCOIN_METRICS_POSITION);
+          anim.targetLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
+          if (anim.currentTarget === 'mainHolo') {
+            anim.startLookAt.copy(HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'smallHolo') {
+            anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
+          } else {
+            anim.startLookAt.copy(MAIN_LOOK_AT);
+          }
           break;
         case 'none':
           anim.targetPos.copy(MAIN_POSITION);
           anim.targetLookAt.copy(MAIN_LOOK_AT);
-          anim.startLookAt.copy(anim.currentTarget === 'mainHolo' ? HOLO_LOOK_AT : SMALL_HOLO_LOOK_AT);
+          if (anim.currentTarget === 'mainHolo') {
+            anim.startLookAt.copy(HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'smallHolo') {
+            anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'altcoinMetrics') {
+            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
+          } else {
+            anim.startLookAt.copy(MAIN_LOOK_AT);
+          }
           break;
       }
       
@@ -226,19 +271,21 @@ const Scene3D = memo(({
 // Composant principal avec le state (seul le HUD se re-render)
 const SpaceScene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
-  const [zoomTarget, setZoomTarget] = useState<'none' | 'mainHolo' | 'smallHolo'>('none');
+  const [zoomTarget, setZoomTarget] = useState<'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics'>('none');
   
   // États pour le mode édition des écrans
   const [isEditMode, setIsEditMode] = useState(true);
   const [transformMode, setTransformMode] = useState<"translate" | "rotate" | "scale">("translate");
-  const [selectedScreen, setSelectedScreen] = useState<"mainHolo" | "smallRightHolo" | null>(null);
+  const [selectedScreen, setSelectedScreen] = useState<"mainHolo" | "smallRightHolo" | "altcoinMetrics" | null>(null);
   const [screenPositions, setScreenPositions] = useState({
     mainHolo: [-0.01, -0.21, 6.24] as [number, number, number],
-    smallRightHolo: [0.424, -0.278, 6.475] as [number, number, number]
+    smallRightHolo: [0.424, -0.278, 6.475] as [number, number, number],
+    altcoinMetrics: [0.593, -0.277, 6.755] as [number, number, number]
   });
   const [screenRotations, setScreenRotations] = useState({
     mainHolo: [0, 0, 0] as [number, number, number],
-    smallRightHolo: [0, 0, 0] as [number, number, number]
+    smallRightHolo: [0, 0, 0] as [number, number, number],
+    altcoinMetrics: [0, 0, 0] as [number, number, number]
   });
   
   // Stabilise la fonction pour éviter les re-renders de Scene3D
@@ -259,9 +306,14 @@ const SpaceScene = () => {
     console.log("SmallRightHoloScreen clicked - Animation de zoom");
   }, []);
 
+  const handleAltcoinMetricsScreenClick = useCallback(() => {
+    setZoomTarget(prev => prev === 'altcoinMetrics' ? 'none' : 'altcoinMetrics');
+    console.log("AltcoinMetricsScreen clicked - Animation de zoom");
+  }, []);
+
   return (
     <>
-      <Canvas camera={{ position: [0, 0, 8], fov: 60, near: 0.1, far: 500 }}>
+      <Canvas camera={{ position: [0, 0, 8], fov: 60, near: 0.01, far: 500 }}>
         {/* Contrôleur d'animation de caméra (indépendant de la scène) */}
         <CameraController zoomTarget={zoomTarget} />
         
@@ -270,6 +322,7 @@ const SpaceScene = () => {
           debug={false}
           useMotion={false}
         />
+
         <EditableObject 
           isEditing={isEditMode}
           isSelected={selectedScreen === "mainHolo"}
@@ -304,6 +357,23 @@ const SpaceScene = () => {
             quaternion={createScreenQuaternion(-29.9, -59.5)}
           />
         </EditableObject>
+        
+        <EditableObject 
+          isEditing={isEditMode}
+          isSelected={selectedScreen === "altcoinMetrics"}
+          transformMode={transformMode}
+          initialPosition={screenPositions.altcoinMetrics}
+          onSelect={() => setSelectedScreen("altcoinMetrics")}
+          onPositionChange={(pos) => setScreenPositions(prev => ({ ...prev, altcoinMetrics: pos }))}
+          onRotationChange={(rot) => setScreenRotations(prev => ({ ...prev, altcoinMetrics: rot }))}
+        >
+          <AltcoinMetricsScreen 
+            onScreenClick={handleAltcoinMetricsScreenClick}
+            useMotions={false}
+            position={[0, 0, 0]} // Position relative dans le groupe parent
+            quaternion={createScreenQuaternion(-29.9, -59.5)}
+          />
+        </EditableObject>
       </Canvas>
 
       {/* Interface de contrôle holographique */}
@@ -330,12 +400,13 @@ const SpaceScene = () => {
             <span className="holo-label">Écran sélectionné:</span>
             <select 
               value={selectedScreen || ""} 
-              onChange={(e) => setSelectedScreen(e.target.value as "mainHolo" | "smallRightHolo" || null)}
+              onChange={(e) => setSelectedScreen(e.target.value as "mainHolo" | "smallRightHolo" | "altcoinMetrics" || null)}
               className="holo-select-screen"
             >
               <option value="">Aucun</option>
               <option value="mainHolo">🖥️ Écran Principal</option>
               <option value="smallRightHolo">📱 Petit Écran Droite</option>
+              <option value="altcoinMetrics">📊 Altcoin Metrics</option>
             </select>
           </div>
         )}
