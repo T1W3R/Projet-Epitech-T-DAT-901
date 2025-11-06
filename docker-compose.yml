@@ -46,6 +46,8 @@ services:
 
   analytics-service:
     build: ./analytics-service
+    env_file:
+      - ./analytics-service/.env
     depends_on:
       - redpanda
     environment:
