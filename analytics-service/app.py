@@ -1,11 +1,14 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from kafka import KafkaConsumer
-import duckdb, json, threading
+import duckdb, json, threading, os
 from datetime import datetime
 import requests
+from dotenv import load_dotenv
 
 app = Flask(__name__)
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 CORS(app)
 
 # Connexion persistante à DuckDB
@@ -73,7 +76,7 @@ def history(symbol, period):
 
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
     params = {"vs_currency": "eur", "days": days}
-    headers = {"x-cg-demo-api-key": "CG-xY4ZEujRYTJ2iDUEziUq8rqD"}
+    headers = {"x-cg-demo-api-key": API_KEY}
 
     try:
         response = requests.get(url, params=params, headers=headers).json()
