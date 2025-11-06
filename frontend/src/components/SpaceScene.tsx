@@ -10,6 +10,7 @@ import HoloScreen from "./3dObjects/HoloScreen";
 import { createScreenQuaternion } from "../utils/mathUtils";
 import SmallHoloScreen from "./3dObjects/SmallHoloScreen";
 import AltcoinMetricsScreen from "./3dObjects/AltcoinMetricsScreen";
+import CryptoDetailsScreen from "./3dObjects/CryptoDetailsScreen";
 import EditableObject from "../utils/EditableObject";
 
 
@@ -61,7 +62,7 @@ const CameraController = memo(({
   zoomTarget,
   onZoomComplete 
 }: { 
-  zoomTarget: 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics';
+  zoomTarget: 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics' | 'cryptoDetails';
   onZoomComplete?: () => void;
 }) => {
   const { camera } = useThree();
@@ -72,7 +73,7 @@ const CameraController = memo(({
     targetPos: new THREE.Vector3(),
     targetLookAt: new THREE.Vector3(),
     progress: 0,
-    currentTarget: 'none' as 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics'
+    currentTarget: 'none' as 'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics' | 'cryptoDetails'
   });
 
   // Positions fixes pour éviter les problèmes de mutation (une seule fois)
@@ -83,6 +84,8 @@ const CameraController = memo(({
     SMALL_HOLO_LOOK_AT: new THREE.Vector3(0.424, -0.278, 6.475),
     ALTCOIN_METRICS_POSITION: new THREE.Vector3(),
     ALTCOIN_METRICS_LOOK_AT: new THREE.Vector3(0.593, -0.277, 6.755),
+    CRYPTO_DETAILS_POSITION: new THREE.Vector3(),
+    CRYPTO_DETAILS_LOOK_AT: new THREE.Vector3(-0.435, -0.274, 6.490),
     MAIN_POSITION: new THREE.Vector3(0, 0, 8),
     MAIN_LOOK_AT: new THREE.Vector3(0, 0, 0)
   });
@@ -101,7 +104,7 @@ const CameraController = memo(({
     
     positionsRef.current.SMALL_HOLO_POSITION.copy(smallCameraPos);
     
-    // Altcoin Metrics Screen (écran de gauche)
+    // Altcoin Metrics Screen (en haut à gauche)
     const altcoinScreenPos = new THREE.Vector3(0.593, -0.277, 6.755);
     const altcoinQuaternion = createScreenQuaternion(-29.9, -59.5);
     
@@ -112,9 +115,21 @@ const CameraController = memo(({
     const altcoinCameraPos = altcoinScreenPos.clone().add(altcoinNormal.multiplyScalar(altcoinCameraDistance));
     
     positionsRef.current.ALTCOIN_METRICS_POSITION.copy(altcoinCameraPos);
+    
+    // Crypto Details Screen (en bas à gauche)
+    const cryptoDetailsScreenPos = new THREE.Vector3(-0.435, -0.274, 6.490);
+    const cryptoDetailsQuaternion = createScreenQuaternion(-29.9, 59.9);
+    
+    const cryptoDetailsNormal = new THREE.Vector3(0, 0, 1);
+    cryptoDetailsNormal.applyQuaternion(cryptoDetailsQuaternion);
+    
+    const cryptoDetailsCameraDistance = 0.45;
+    const cryptoDetailsCameraPos = cryptoDetailsScreenPos.clone().add(cryptoDetailsNormal.multiplyScalar(cryptoDetailsCameraDistance));
+    
+    positionsRef.current.CRYPTO_DETAILS_POSITION.copy(cryptoDetailsCameraPos);
   }, []);
 
-  const { HOLO_POSITION, HOLO_LOOK_AT, SMALL_HOLO_POSITION, SMALL_HOLO_LOOK_AT, ALTCOIN_METRICS_POSITION, ALTCOIN_METRICS_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
+  const { HOLO_POSITION, HOLO_LOOK_AT, SMALL_HOLO_POSITION, SMALL_HOLO_LOOK_AT, ALTCOIN_METRICS_POSITION, ALTCOIN_METRICS_LOOK_AT, CRYPTO_DETAILS_POSITION, CRYPTO_DETAILS_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
 
   useFrame((_, delta) => {
     const anim = animationRef.current;
@@ -134,6 +149,8 @@ const CameraController = memo(({
             anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
           } else if (anim.currentTarget === 'altcoinMetrics') {
             anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
+          } else if (anim.currentTarget === 'cryptoDetails') {
+            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
           } else {
             anim.startLookAt.copy(MAIN_LOOK_AT);
           }
@@ -145,6 +162,8 @@ const CameraController = memo(({
             anim.startLookAt.copy(HOLO_LOOK_AT);
           } else if (anim.currentTarget === 'altcoinMetrics') {
             anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
+          } else if (anim.currentTarget === 'cryptoDetails') {
+            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
           } else {
             anim.startLookAt.copy(MAIN_LOOK_AT);
           }
@@ -156,6 +175,21 @@ const CameraController = memo(({
             anim.startLookAt.copy(HOLO_LOOK_AT);
           } else if (anim.currentTarget === 'smallHolo') {
             anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'cryptoDetails') {
+            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
+          } else {
+            anim.startLookAt.copy(MAIN_LOOK_AT);
+          }
+          break;
+        case 'cryptoDetails':
+          anim.targetPos.copy(CRYPTO_DETAILS_POSITION);
+          anim.targetLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
+          if (anim.currentTarget === 'mainHolo') {
+            anim.startLookAt.copy(HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'smallHolo') {
+            anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
+          } else if (anim.currentTarget === 'altcoinMetrics') {
+            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
           } else {
             anim.startLookAt.copy(MAIN_LOOK_AT);
           }
@@ -169,6 +203,8 @@ const CameraController = memo(({
             anim.startLookAt.copy(SMALL_HOLO_LOOK_AT);
           } else if (anim.currentTarget === 'altcoinMetrics') {
             anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
+          } else if (anim.currentTarget === 'cryptoDetails') {
+            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
           } else {
             anim.startLookAt.copy(MAIN_LOOK_AT);
           }
@@ -271,21 +307,23 @@ const Scene3D = memo(({
 // Composant principal avec le state (seul le HUD se re-render)
 const SpaceScene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
-  const [zoomTarget, setZoomTarget] = useState<'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics'>('none');
+  const [zoomTarget, setZoomTarget] = useState<'none' | 'mainHolo' | 'smallHolo' | 'altcoinMetrics' | 'cryptoDetails'>('none');
   
   // États pour le mode édition des écrans
   const [isEditMode, setIsEditMode] = useState(true);
   const [transformMode, setTransformMode] = useState<"translate" | "rotate" | "scale">("translate");
-  const [selectedScreen, setSelectedScreen] = useState<"mainHolo" | "smallRightHolo" | "altcoinMetrics" | null>(null);
+  const [selectedScreen, setSelectedScreen] = useState<"mainHolo" | "smallRightHolo" | "altcoinMetrics" | "cryptoDetails" | null>(null);
   const [screenPositions, setScreenPositions] = useState({
     mainHolo: [-0.01, -0.21, 6.24] as [number, number, number],
     smallRightHolo: [0.424, -0.278, 6.475] as [number, number, number],
-    altcoinMetrics: [0.593, -0.277, 6.755] as [number, number, number]
+    altcoinMetrics: [0.593, -0.277, 6.755] as [number, number, number],
+    cryptoDetails: [-0.435, -0.274, 6.490] as [number, number, number]
   });
   const [screenRotations, setScreenRotations] = useState({
     mainHolo: [0, 0, 0] as [number, number, number],
     smallRightHolo: [0, 0, 0] as [number, number, number],
-    altcoinMetrics: [0, 0, 0] as [number, number, number]
+    altcoinMetrics: [0, 0, 0] as [number, number, number],
+    cryptoDetails: [0, 0, 0] as [number, number, number]
   });
   
   // Stabilise la fonction pour éviter les re-renders de Scene3D
@@ -309,6 +347,11 @@ const SpaceScene = () => {
   const handleAltcoinMetricsScreenClick = useCallback(() => {
     setZoomTarget(prev => prev === 'altcoinMetrics' ? 'none' : 'altcoinMetrics');
     console.log("AltcoinMetricsScreen clicked - Animation de zoom");
+  }, []);
+
+  const handleCryptoDetailsScreenClick = useCallback(() => {
+    setZoomTarget(prev => prev === 'cryptoDetails' ? 'none' : 'cryptoDetails');
+    console.log("CryptoDetailsScreen clicked - Animation de zoom");
   }, []);
 
   return (
@@ -374,6 +417,24 @@ const SpaceScene = () => {
             quaternion={createScreenQuaternion(-29.9, -59.5)}
           />
         </EditableObject>
+        
+        <EditableObject 
+          isEditing={isEditMode}
+          isSelected={selectedScreen === "cryptoDetails"}
+          transformMode={transformMode}
+          initialPosition={screenPositions.cryptoDetails}
+          onSelect={() => setSelectedScreen("cryptoDetails")}
+          onPositionChange={(pos) => setScreenPositions(prev => ({ ...prev, cryptoDetails: pos }))}
+          onRotationChange={(rot) => setScreenRotations(prev => ({ ...prev, cryptoDetails: rot }))}
+        >
+          <CryptoDetailsScreen 
+            selectedPlanet={selectedPlanet}
+            onScreenClick={handleCryptoDetailsScreenClick}
+            useMotions={false}
+            position={[0, 0, 0]} // Position relative dans le groupe parent
+            quaternion={createScreenQuaternion(-29.9, 59.9)}
+          />
+        </EditableObject>
       </Canvas>
 
       {/* Interface de contrôle holographique */}
@@ -400,13 +461,14 @@ const SpaceScene = () => {
             <span className="holo-label">Écran sélectionné:</span>
             <select 
               value={selectedScreen || ""} 
-              onChange={(e) => setSelectedScreen(e.target.value as "mainHolo" | "smallRightHolo" | "altcoinMetrics" || null)}
+              onChange={(e) => setSelectedScreen(e.target.value as "mainHolo" | "smallRightHolo" | "altcoinMetrics" | "cryptoDetails" || null)}
               className="holo-select-screen"
             >
               <option value="">Aucun</option>
               <option value="mainHolo">🖥️ Écran Principal</option>
               <option value="smallRightHolo">📱 Petit Écran Droite</option>
               <option value="altcoinMetrics">📊 Altcoin Metrics</option>
+              <option value="cryptoDetails">💰 Crypto Details</option>
             </select>
           </div>
         )}
