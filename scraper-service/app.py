@@ -6,24 +6,27 @@ TOPIC = "crypto_prices"
 producer = KafkaProducer(
     bootstrap_servers="redpanda:9092",
     value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-    acks='all',       # attendre la confirmation
+    acks='all',
     retries=5,
     linger_ms=10
 )
 
 print("Scraper connected to Redpanda ✅")
 
+API_KEY = "CG-xY4ZEujRYTJ2iDUEziUq8rqD"
+
 while True:
     try:
         response = requests.get(
             "https://api.coingecko.com/api/v3/coins/markets",
             params={
-                "vs_currency": "usd",
+                "vs_currency": "eur",
                 "order": "market_cap_desc",
                 "per_page": 100,
                 "page": 1,
                 "sparkline": "false"
-            }
+            },
+            headers={"x-cg-demo-api-key": API_KEY}
         ).json()
 
         for coin in response:
@@ -42,7 +45,7 @@ while True:
 
         producer.flush()
         print(f"Sent {len(response)} coins to Kafka")
-        time.sleep(60)  # update toutes les minutes
+        time.sleep(60)
     except Exception as e:
         print("Error fetching data:", e)
         time.sleep(10)

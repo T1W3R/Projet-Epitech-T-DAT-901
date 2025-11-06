@@ -1,8 +1,9 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from kafka import KafkaConsumer
-import duckdb, json, threading, time
-from datetime import datetime, timedelta
+import duckdb, json, threading
+from datetime import datetime
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -36,30 +37,60 @@ def consume():
 
 threading.Thread(target=consume, daemon=True).start()
 
-# Route pour les 10 dernières lignes (déjà existante)
-@app.route("/last10")
-def last10():
-    result = con.execute(
-        "SELECT * FROM crypto_prices ORDER BY ts DESC LIMIT 10"
-    ).fetchall()
-    return jsonify(result)
-
-# 🚀 Nouvelle route : historique BTC sur 24h
-@app.route("/btc/history")
-def btc_history():
-    # Récupère toutes les valeurs du BTC depuis les dernières 24h
-    one_day_ago = datetime.utcnow() - timedelta(hours=24)
-    query = """
-        SELECT ts, price
-        FROM crypto_prices
-        WHERE crypto = 'BTC' AND ts >= ?
-        ORDER BY ts ASC
-    """
-    rows = con.execute(query, [one_day_ago]).fetchall()
+# Dernier prix
+@app.route("/price/<symbol>")
+def get_price(symbol):
+    print('hello')
+    row = con.execute(
+        "SELECT price, ts FROM crypto_prices WHERE crypto = ? ORDER BY ts DESC LIMIT 1",
+        [symbol.upper()]
+    ).fetchone()
     
-    # Structure les données pour le front
-    data = [{"time": r[0].isoformat(), "price": r[1]} for r in rows]
-    return jsonify(data)
+    if row:
+        return jsonify({"crypto": symbol.upper(), "price": row[0], "ts": row[1].isoformat()})
+    else:
+        return jsonify({"error": "Crypto not found"}), 404
+    
+@app.route("/history/<period>/<symbol>")
+def history(symbol, period):
+    """Historique de prix sur 1 jour / 30 jours / 365 jours"""
+    id_map = {
+        "BTC": "bitcoin",
+        "ETH": "ethereum",
+        "BNB": "binancecoin",
+        "SOL": "solana",
+        "ADA": "cardano"
+    }
+    coin_id = id_map.get(symbol.upper(), symbol.lower())
+
+    # On adapte les périodes
+    days_map = {
+        "day": 1,
+        "month": 30,
+        "year": 365
+    }
+    days = days_map.get(period, 1)
+
+    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
+    params = {"vs_currency": "eur", "days": days}
+    headers = {"x-cg-demo-api-key": "CG-xY4ZEujRYTJ2iDUEziUq8rqD"}
+
+    try:
+        response = requests.get(url, params=params, headers=headers).json()
+        prices = [
+            {
+                "time": datetime.utcfromtimestamp(p[0] / 1000).isoformat(),
+                "price": p[1]
+            }
+            for p in response["prices"]
+        ]
+        return jsonify({"symbol": symbol.upper(), "period": period, "points": prices})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
+
