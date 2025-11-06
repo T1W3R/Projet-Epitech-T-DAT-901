@@ -6,12 +6,14 @@ import duckdb, json, threading, time
 app = Flask(__name__)
 CORS(app)
 
-# Connexion à DuckDB persistante
+# DuckDB persistante
 con = duckdb.connect('crypto.duckdb')
 con.execute("""
-CREATE TABLE IF NOT EXISTS news (
-    crypto TEXT, 
-    price DOUBLE, 
+CREATE TABLE IF NOT EXISTS crypto_prices (
+    crypto TEXT,
+    price DOUBLE,
+    market_cap DOUBLE,
+    volume DOUBLE,
     ts TIMESTAMP
 )
 """)
@@ -20,27 +22,34 @@ def consume():
     while True:
         try:
             consumer = KafkaConsumer(
-                "crypto_news",
-                bootstrap_servers="kafka:9092",
-                value_deserializer=lambda v: json.loads(v.decode("utf-8"))
+                "crypto_prices",
+                bootstrap_servers="redpanda:9092",
+                value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+                consumer_timeout_ms=1000  # ne bloque pas indéfiniment
             )
+            print("Consumer connected to Redpanda ✅", flush=True)
+
             for msg in consumer:
                 data = msg.value
                 con.execute(
-                    "INSERT INTO news VALUES (?, ?, NOW())",
-                    [data["crypto"], data["price"]]
+                    "INSERT INTO crypto_prices VALUES (?, ?, ?, ?, NOW())",
+                    [data["crypto"], data["price"], data["market_cap"], data["volume"]]
                 )
-                print("Inserted from Kafka into DuckDB:", data)
+                print("Inserted:", data, flush=True)
         except Exception as e:
-            print("Kafka error:", e)
-            time.sleep(5)
+            print("Kafka connection error:", e, flush=True)
+            time.sleep(5)  # on retente après 5 secondes
 
+# Lancer le thread consumer
 threading.Thread(target=consume, daemon=True).start()
 
 @app.route("/last10")
 def last10():
-    result = con.execute("SELECT * FROM news ORDER BY ts DESC LIMIT 10").fetchall()
+    result = con.execute(
+        "SELECT * FROM crypto_prices ORDER BY ts DESC LIMIT 10"
+    ).fetchall()
     return jsonify(result)
 
 if __name__ == "__main__":
+    print("Starting Flask server...", flush=True)
     app.run(host="0.0.0.0", port=5000)
