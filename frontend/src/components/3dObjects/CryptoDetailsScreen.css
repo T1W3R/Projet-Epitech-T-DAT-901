@@ -1,0 +1,148 @@
+.crypto-details-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: monospace;
+  color: white;
+  padding: 15px;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.crypto-details-container:hover {
+  cursor: pointer;
+}
+
+.crypto-title {
+  margin: 0 0 12px 0;
+  font-size: 24px;
+  color: #00ffff;
+  text-align: center;
+  text-shadow: 0 0 10px #00ffff;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  flex: 1;
+}
+
+/* Carte de métrique - Cap. Marché (Full Width) */
+.metric-card-full {
+  grid-column: 1 / -1;
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.6);
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Cartes de métriques - Row 2 (Turquoise) */
+.metric-card-turquoise {
+  background: rgba(0, 221, 170, 0.08);
+  border: 1px solid rgba(0, 221, 170, 0.5);
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: 0 0 10px rgba(0, 221, 170, 0.2);
+}
+
+/* Cartes de métriques - Row 3 (Violet) */
+.metric-card-purple {
+  background: rgba(170, 0, 255, 0.08);
+  border: 1px solid rgba(170, 0, 255, 0.5);
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: 0 0 10px rgba(170, 0, 255, 0.2);
+}
+
+/* Cartes de métriques - Row 4 (Orange) */
+.metric-card-orange {
+  background: rgba(255, 136, 0, 0.08);
+  border: 1px solid rgba(255, 136, 0, 0.5);
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: 0 0 10px rgba(255, 136, 0, 0.2);
+}
+
+.metric-label {
+  font-size: 10px;
+  color: #66ccff;
+  margin-bottom: 4px;
+}
+
+.metric-value {
+  font-size: 16px;
+}
+
+.metric-value-large {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.metric-value-medium {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.metric-value-small {
+  font-size: 14px;
+}
+
+.metric-change {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.metric-change-small {
+  font-size: 13px;
+}
+
+.metric-label-large {
+  font-size: 11px;
+  color: #66ccff;
+  margin-bottom: 4px;
+}
+
+/* État vide - pas de planète sélectionnée */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 10px;
+}
+
+.empty-state-title {
+  font-size: 18px;
+  color: #666699;
+}
+
+.empty-state-subtitle {
+  font-size: 16px;
+  color: #4488aa;
+}
+
+.empty-state-text {
+  font-size: 14px;
+  color: #335577;
+}
+
+/* Couleurs pour les variations */
+.color-positive {
+  color: #00ff88;
+}
+
+.color-negative {
+  color: #ff4444;
+}
+
+.color-neutral {
+  color: #aaccff;
+}
+
