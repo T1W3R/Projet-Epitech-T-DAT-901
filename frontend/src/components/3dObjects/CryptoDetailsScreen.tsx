@@ -1,7 +1,8 @@
-import { RenderTexture, Text, PerspectiveCamera } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
+import "./CryptoDetailsScreen.css";
 
 const CryptoDetailsScreen = ({ 
   selectedPlanet,
@@ -71,25 +72,6 @@ const CryptoDetailsScreen = ({
 
   return (
     <group ref={groupRef} position={basePosition} quaternion={quaternion}>
-      {/* Zone cliquable invisible pour toute l'interface */}
-      <mesh 
-        position={[0, 0, 0.01]}
-        onClick={(e) => {
-          e.stopPropagation();
-          onScreenClick && onScreenClick();
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          document.body.style.cursor = 'pointer';
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = 'default';
-        }}
-      >
-        <planeGeometry args={[0.5, 0.25]} />
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
-
       {/* Cadre holographique lumineux */}
       <mesh 
         ref={frameRef}
@@ -106,7 +88,7 @@ const CryptoDetailsScreen = ({
         />
       </mesh>
 
-      {/* Écran holographique principal */}
+      {/* Écran avec fond */}
       <mesh 
         ref={meshRef}
         position={[0, 0, -0.008]} 
@@ -115,220 +97,141 @@ const CryptoDetailsScreen = ({
       >
         <planeGeometry args={[2.5, 1.5]} />
         <meshBasicMaterial
+          color="#000a1a"
           transparent
           opacity={0.85}
           side={THREE.DoubleSide}
-        >
-          <RenderTexture attach="map" anisotropy={16}>
-            <PerspectiveCamera makeDefault position={[0, 0, 10]} />
-            <color attach="background" args={["#000a1a"]} />
-            <ambientLight intensity={0.8} />
-            
-            {selectedPlanet ? (
-              <>
-                {/* Titre avec nom de la crypto */}
-                <Text 
-                  position={[0, 3.5, 0]}
-                  fontSize={1.4} 
-                  color="#00ffff"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  {selectedPlanet}
-                </Text>
-
-                {/* Ligne 1: Cap. Marché */}
-                <Text 
-                  position={[-3, 2.3, 0]}
-                  fontSize={0.55} 
-                  color="#8899bb"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  Cap. Marché
-                </Text>
-                <Text 
-                  position={[-3, 1.7, 0]}
-                  fontSize={0.75} 
-                  color="#ffffff"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  {cryptoData.marketCap}
-                </Text>
-                <Text 
-                  position={[-3, 1.15, 0]}
-                  fontSize={0.55} 
-                  color={getChangeColor(cryptoData.marketCapChange)}
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  {cryptoData.marketCapChange}
-                </Text>
-
-                {/* Ligne 1: Volume (24h) */}
-                <Text 
-                  position={[1, 2.3, 0]}
-                  fontSize={0.55} 
-                  color="#8899bb"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  Volume (24h)
-                </Text>
-                <Text 
-                  position={[1, 1.7, 0]}
-                  fontSize={0.75} 
-                  color="#ffffff"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  {cryptoData.volume24h}
-                </Text>
-                <Text 
-                  position={[1, 1.15, 0]}
-                  fontSize={0.55} 
-                  color={getChangeColor(cryptoData.volumeChange)}
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  {cryptoData.volumeChange}
-                </Text>
-
-                {/* Ligne 2: FDV */}
-                <Text 
-                  position={[-3, 0.3, 0]}
-                  fontSize={0.55} 
-                  color="#8899bb"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  FDV
-                </Text>
-                <Text 
-                  position={[-3, -0.2, 0]}
-                  fontSize={0.75} 
-                  color="#ffffff"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  {cryptoData.fdv}
-                </Text>
-
-                {/* Ligne 2: Vol/Mkt Cap (24h) */}
-                <Text 
-                  position={[1, 0.3, 0]}
-                  fontSize={0.55} 
-                  color="#8899bb"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  Vol/Mkt Cap (24h)
-                </Text>
-                <Text 
-                  position={[1, -0.2, 0]}
-                  fontSize={0.75} 
-                  color="#ffffff"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  {cryptoData.volMarketCapRatio}
-                </Text>
-
-                {/* Ligne 3: Offre Totale */}
-                <Text 
-                  position={[-3, -1.1, 0]}
-                  fontSize={0.55} 
-                  color="#8899bb"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  Offre Totale
-                </Text>
-                <Text 
-                  position={[-3, -1.6, 0]}
-                  fontSize={0.7} 
-                  color="#ffffff"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  {cryptoData.totalSupply}
-                </Text>
-
-                {/* Ligne 3: Offre max. */}
-                <Text 
-                  position={[1, -1.1, 0]}
-                  fontSize={0.55} 
-                  color="#8899bb"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  Offre max.
-                </Text>
-                <Text 
-                  position={[1, -1.6, 0]}
-                  fontSize={0.7} 
-                  color="#ffffff"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  {cryptoData.maxSupply}
-                </Text>
-
-                {/* Ligne 4: Offre en circulation */}
-                <Text 
-                  position={[-3, -2.6, 0]}
-                  fontSize={0.55} 
-                  color="#8899bb"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  Offre en circulation
-                </Text>
-                <Text 
-                  position={[-3, -3.1, 0]}
-                  fontSize={0.7} 
-                  color="#ffffff"
-                  anchorX="left"
-                  anchorY="middle"
-                >
-                  {cryptoData.circulatingSupply}
-                </Text>
-              </>
-            ) : (
-              <>
-                <Text 
-                  position={[0, 0.9, 0]}
-                  fontSize={0.75} 
-                  color="#666699"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  [ CRYPTO DETAILS ]
-                </Text>
-                <Text 
-                  position={[0, 0.0, 0]}
-                  fontSize={0.75} 
-                  color="#4488aa"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  Sélectionnez une planète
-                </Text>
-                <Text 
-                  position={[0, -0.75, 0]}
-                  fontSize={0.55} 
-                  color="#335577"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  pour afficher les détails
-                </Text>
-              </>
-            )}
-          </RenderTexture>
-        </meshBasicMaterial>
+        />
       </mesh>
+
+      {/* Interface HTML/CSS */}
+      <Html
+        transform
+        occlude
+        position={[0, 0, 0]}
+        distanceFactor={0.13}
+        style={{
+          width: '500px',
+          height: '300px',
+          pointerEvents: 'auto',
+        }}
+      >
+        <div
+          className="crypto-details-container"
+          onClick={(e) => {
+            e.stopPropagation();
+            onScreenClick && onScreenClick();
+          }}
+        >
+          {selectedPlanet ? (
+            <>
+              {/* Titre */}
+              <h1 className="crypto-title">
+                {selectedPlanet}
+              </h1>
+
+              {/* Grille des métriques */}
+              <div className="metrics-grid">
+                {/* ROW 1: Cap. Marché - Full Width */}
+                <div className="metric-card-full">
+                  <div>
+                    <div className="metric-label-large">
+                      CAP. MARCHÉ
+                    </div>
+                    <div className="metric-value-large">
+                      {cryptoData.marketCap}
+                    </div>
+                  </div>
+                  <div 
+                    className="metric-change"
+                    style={{ color: getChangeColor(cryptoData.marketCapChange) }}
+                  >
+                    {cryptoData.marketCapChange}
+                  </div>
+                </div>
+
+                {/* ROW 2: Volume (24h) */}
+                <div className="metric-card-turquoise">
+                  <div className="metric-label">
+                    VOLUME (24H)
+                  </div>
+                  <div className="metric-value-medium">
+                    {cryptoData.volume24h}
+                  </div>
+                  <div 
+                    className="metric-change-small"
+                    style={{ color: getChangeColor(cryptoData.volumeChange) }}
+                  >
+                    {cryptoData.volumeChange}
+                  </div>
+                </div>
+
+                {/* ROW 2: FDV */}
+                <div className="metric-card-turquoise">
+                  <div className="metric-label">
+                    FDV
+                  </div>
+                  <div className="metric-value">
+                    {cryptoData.fdv}
+                  </div>
+                </div>
+
+                {/* ROW 3: Vol/Mkt Cap (24h) */}
+                <div className="metric-card-purple">
+                  <div className="metric-label">
+                    VOL/MKT CAP (24H)
+                  </div>
+                  <div className="metric-value">
+                    {cryptoData.volMarketCapRatio}
+                  </div>
+                </div>
+
+                {/* ROW 3: Offre Totale */}
+                <div className="metric-card-purple">
+                  <div className="metric-label">
+                    OFFRE TOTALE
+                  </div>
+                  <div className="metric-value-small">
+                    {cryptoData.totalSupply}
+                  </div>
+                </div>
+
+                {/* ROW 4: Offre max. */}
+                <div className="metric-card-orange">
+                  <div className="metric-label">
+                    OFFRE MAX.
+                  </div>
+                  <div className="metric-value">
+                    {cryptoData.maxSupply}
+                  </div>
+                </div>
+
+                {/* ROW 4: Offre en circulation */}
+                <div className="metric-card-orange">
+                  <div className="metric-label">
+                    OFFRE EN CIRCULATION
+                  </div>
+                  <div className="metric-value-small">
+                    {cryptoData.circulatingSupply}
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-state-title">
+                [ CRYPTO DETAILS ]
+              </div>
+              <div className="empty-state-subtitle">
+                Sélectionnez une planète
+              </div>
+              <div className="empty-state-text">
+                pour afficher les détails
+              </div>
+            </div>
+          )}
+        </div>
+      </Html>
     </group>
   );
 };
