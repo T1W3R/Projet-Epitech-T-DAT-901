@@ -1,0 +1,81 @@
+/* Container principal */
+.chart-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-self: center;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #ffffff;
+  padding: 25px 30px;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(26, 31, 48, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
+  gap: 25px;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* Contenu principal (avec planète sélectionnée) */
+.chart-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  text-align: center;
+}
+
+.chart-title {
+  font-size: 102px;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+.chart-subtitle {
+  font-size: 52px;
+  color: #a0aec0;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* État vide (quand aucune planète sélectionnée) */
+.chart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 15px;
+  padding: 40px 20px;
+}
+
+.chart-empty-title {
+  font-size: 102px;
+  color: #00ffff;
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.chart-empty-subtitle {
+  font-size: 52px;
+  color: #a0aec0;
+  text-shadow: 0 0 8px rgba(160, 174, 192, 0.5);
+}
+
+.chart-empty-text {
+  font-size: 42px;
+  color: #718096;
+  text-shadow: 0 0 6px rgba(113, 128, 150, 0.5);
+}
+

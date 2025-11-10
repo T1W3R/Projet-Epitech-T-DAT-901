@@ -24,7 +24,7 @@ const CryptoDetailsScreen = ({
   // Positions de base pour l'écran holographique
   const basePosition: [number, number, number] = position;
 
-  // Données simulées pour une crypto (à remplacer par des vraies données API plus tard)
+  //* Données simulées pour une crypto (à remplacer par des vraies données API plus tard)
   const cryptoData = {
     marketCap: "$428.19B",
     marketCapChange: "+0.2%",
