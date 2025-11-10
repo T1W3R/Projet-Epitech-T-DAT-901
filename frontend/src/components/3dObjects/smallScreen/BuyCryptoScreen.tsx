@@ -24,7 +24,7 @@ const BuyCryptoScreen = ({
   // Positions de base pour l'écran holographique
   const basePosition: [number, number, number] = position;
 
-  // Données de prix simulées
+  //* Données de prix simulées (à remplacer par des vraies données API plus tard)
   const priceData = {
     currentPrice: "$45,123.89",
     priceChange: "+2.34%",

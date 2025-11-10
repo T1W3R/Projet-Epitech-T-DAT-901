@@ -10,7 +10,6 @@ const AltcoinMetricsScreen = ({
   quaternion = undefined,
 }: { 
   onScreenClick?: () => void;
-  useMotions?: boolean;
   position?: [number, number, number];
   quaternion?: THREE.Quaternion | undefined;
 }) => {
@@ -23,7 +22,7 @@ const AltcoinMetricsScreen = ({
   // Positions de base pour l'écran holographique
   const basePosition: [number, number, number] = position;
 
-  // Données simulées (à remplacer par des vraies données API plus tard)
+  //* Données simulées (à remplacer par des vraies données API plus tard)
   const fearGreedIndex = 30; // 0-100
   const altcoinSeasonIndex = 25; // 0-100
 

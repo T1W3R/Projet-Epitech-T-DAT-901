@@ -22,7 +22,7 @@ const BitcoinDominanceScreen = ({
   // Positions de base pour l'écran holographique
   const basePosition: [number, number, number] = position;
 
-  // Données simulées pour la dominance (à remplacer par des vraies données API plus tard)
+  //* Données simulées pour la dominance (à remplacer par des vraies données API plus tard)
   const dominanceData = {
     bitcoin: {
       percentage: 60,
