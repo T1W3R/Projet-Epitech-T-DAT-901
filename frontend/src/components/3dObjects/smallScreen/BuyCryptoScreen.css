@@ -1,0 +1,114 @@
+/* Container principal */
+.buy-crypto-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+  color: #00ffff;
+  padding: 20px;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Titre */
+.buy-crypto-title {
+  font-size: 42px;
+  font-weight: bold;
+  margin: 0 0 30px 0;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+  letter-spacing: 2px;
+}
+
+/* Prix */
+.buy-crypto-price {
+  font-size: 28px;
+  color: #00ff88;
+  margin-bottom: 40px;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.8);
+  font-weight: 600;
+}
+
+/* Actions */
+.buy-crypto-actions {
+  display: flex;
+  gap: 30px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Boutons */
+.buy-button,
+.sell-button {
+  padding: 15px 40px;
+  font-size: 20px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  border: 2px solid;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+}
+
+.buy-button {
+  color: #00ff00;
+  border-color: #00ff00;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+}
+
+.buy-button:hover {
+  background: rgba(0, 255, 0, 0.2);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+  transform: scale(1.05);
+}
+
+.sell-button {
+  color: #ff0000;
+  border-color: #ff0000;
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+}
+
+.sell-button:hover {
+  background: rgba(255, 0, 0, 0.2);
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+  transform: scale(1.05);
+}
+
+/* État vide */
+.buy-crypto-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.buy-crypto-empty-title {
+  font-size: 24px;
+  color: #666699;
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(102, 102, 153, 0.5);
+}
+
+.buy-crypto-empty-subtitle {
+  font-size: 22px;
+  color: #4488aa;
+  text-shadow: 0 0 8px rgba(68, 136, 170, 0.5);
+}
+
+.buy-crypto-empty-text {
+  font-size: 18px;
+  color: #335577;
+  text-shadow: 0 0 6px rgba(51, 85, 119, 0.5);
+}
+

@@ -1,7 +1,8 @@
-import { RenderTexture, Text, PerspectiveCamera } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
+import "./AltcoinMetricsScreen.css";
 
 const AltcoinMetricsScreen = ({ 
   onScreenClick,
@@ -85,25 +86,6 @@ const AltcoinMetricsScreen = ({
 
   return (
     <group ref={groupRef} position={basePosition} quaternion={quaternion}>
-      {/* Zone cliquable invisible pour toute l'interface */}
-      <mesh 
-        position={[0, 0, 0.01]}
-        onClick={(e) => {
-          e.stopPropagation();
-          onScreenClick && onScreenClick();
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          document.body.style.cursor = 'pointer';
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = 'default';
-        }}
-      >
-        <planeGeometry args={[0.5, 0.25]} />
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
-
       {/* Cadre holographique lumineux */}
       <mesh 
         ref={frameRef}
@@ -120,7 +102,7 @@ const AltcoinMetricsScreen = ({
         />
       </mesh>
 
-      {/* Écran holographique principal */}
+      {/* Écran avec fond */}
       <mesh 
         ref={meshRef}
         position={[0, 0, -0.008]} 
@@ -129,97 +111,71 @@ const AltcoinMetricsScreen = ({
       >
         <planeGeometry args={[2.5, 1.5]} />
         <meshBasicMaterial
+          color="#000a1a"
           transparent
           opacity={0.85}
           side={THREE.DoubleSide}
-        >
-          <RenderTexture attach="map" anisotropy={16}>
-            <PerspectiveCamera makeDefault position={[0, 0, 10]} />
-            <color attach="background" args={["#000a1a"]} />
-            <ambientLight intensity={0.8} />
-            
-            {/* Titre de l'écran */}
-            <Text 
-              position={[0, 3.2, 0]}
-              fontSize={1.2} 
-              color="#00ffff"
-              anchorX="center"
-              anchorY="middle"
-            >
-              [ MARKET METRICS ]
-            </Text>
+        />
+      </mesh>
 
-            {/* Section Fear & Greed Index */}
-            <Text 
-              position={[0, 1.8, 0]}
-              fontSize={0.85} 
-              color="#aaccff"
-              anchorX="center"
-              anchorY="middle"
-            >
-              Fear & Greed Index
-            </Text>
-            <Text 
-              position={[0, 0.8, 0]}
-              fontSize={1.5} 
-              color={getFearGreedColor(fearGreedIndex)}
-              anchorX="center"
-              anchorY="middle"
+      {/* Interface HTML/CSS */}
+      <Html
+        transform
+        position={[0, 0, 0]}
+        distanceFactor={0.13}
+        style={{
+          width: '500px',
+          height: '300px',
+          pointerEvents: 'auto',
+        }}
+      >
+        <div
+          className="metrics-container"
+          onClick={(e) => {
+            e.stopPropagation();
+            onScreenClick && onScreenClick();
+          }}
+        >
+          <h1 className="metrics-main-title">[ MARKET METRICS ]</h1>
+
+          {/* Section Fear & Greed Index */}
+          <div className="metrics-section">
+            <div className="metrics-section-title">Fear & Greed Index</div>
+            <div 
+              className="metrics-value-large"
+              style={{ color: getFearGreedColor(fearGreedIndex) }}
             >
               {fearGreedIndex}
-            </Text>
-            <Text 
-              position={[0, 0, 0]}
-              fontSize={0.65} 
-              color={getFearGreedColor(fearGreedIndex)}
-              anchorX="center"
-              anchorY="middle"
+            </div>
+            <div 
+              className="metrics-label"
+              style={{ color: getFearGreedColor(fearGreedIndex) }}
             >
               {getFearGreedLabel(fearGreedIndex)}
-            </Text>
+            </div>
+          </div>
 
-            {/* Séparateur */}
-            <Text 
-              position={[0, -0.8, 0]}
-              fontSize={0.5} 
-              color="#335577"
-              anchorX="center"
-              anchorY="middle"
-            >
-              ───────────
-            </Text>
+          {/* Séparateur */}
+          <div className="metrics-separator">───────────</div>
 
-            {/* Section Altcoin Season Index */}
-            <Text 
-              position={[0, -1.5, 0]}
-              fontSize={0.85} 
-              color="#aaccff"
-              anchorX="center"
-              anchorY="middle"
-            >
-              Altcoin Season Index
-            </Text>
-            <Text 
-              position={[0, -2.4, 0]}
-              fontSize={1.5} 
-              color={getAltcoinSeasonColor(altcoinSeasonIndex)}
-              anchorX="center"
-              anchorY="middle"
+          {/* Section Altcoin Season Index */}
+          <div className="metrics-section">
+            <div className="metrics-section-title">Altcoin Season Index</div>
+            <div 
+              className="metrics-value-large"
+              style={{ color: getAltcoinSeasonColor(altcoinSeasonIndex) }}
             >
               {altcoinSeasonIndex}
-            </Text>
-            <Text 
-              position={[0, -3.2, 0]}
-              fontSize={0.65} 
-              color={getAltcoinSeasonColor(altcoinSeasonIndex)}
-              anchorX="center"
-              anchorY="middle"
+            </div>
+            <div 
+              className="metrics-label"
+              style={{ color: getAltcoinSeasonColor(altcoinSeasonIndex) }}
             >
               {getAltcoinSeasonLabel(altcoinSeasonIndex)}
-            </Text>
-          </RenderTexture>
-        </meshBasicMaterial>
-      </mesh>
+            </div>
+          </div>
+        </div>
+      </Html>
     </group>
   );
 };
