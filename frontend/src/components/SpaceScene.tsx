@@ -3,7 +3,7 @@ import { Stars as DreiStars, OrbitControls, Stats } from "@react-three/drei";
 import Planet from "./3dObjects/Planet";
 import Spaceship from "./3dObjects/Spaceship";
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
-import { useFrame, useThree } from "@react-three/fiber"; // Utilisés dans le code commenté (CameraController)
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import './SpaceScene.css';
 import ChartScreen from "./3dObjects/ChartScreen";
@@ -350,7 +350,7 @@ const SpaceScene = () => {
   const [zoomTarget, setZoomTarget] = useState<'none' | 'chart' | 'buyCrypto' | 'altcoinMetrics' | 'cryptoDetails' | 'btcDominance'>('none');
   
   // États pour le mode édition des écrans
-  const [isEditMode, setIsEditMode] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [transformMode, setTransformMode] = useState<"translate" | "rotate" | "scale">("translate");
   const [selectedScreen, setSelectedScreen] = useState<"chart" | "buyCrypto" | "altcoinMetrics" | "cryptoDetails" | "btcDominance" | null>(null);
   const [screenPositions, setScreenPositions] = useState({
@@ -383,28 +383,23 @@ const SpaceScene = () => {
 
   const handleBuyCryptoScreenClick = useCallback(() => {
     setZoomTarget(prev => prev === 'buyCrypto' ? 'none' : 'buyCrypto');
-    console.log("BuyCryptoScreen clicked - Animation de zoom");
   }, []);
 
   const handleAltcoinMetricsScreenClick = useCallback(() => {
     setZoomTarget(prev => prev === 'altcoinMetrics' ? 'none' : 'altcoinMetrics');
-    console.log("AltcoinMetricsScreen clicked - Animation de zoom");
   }, []);
 
   const handleCryptoDetailsScreenClick = useCallback(() => {
     setZoomTarget(prev => prev === 'cryptoDetails' ? 'none' : 'cryptoDetails');
-    console.log("CryptoDetailsScreen clicked - Animation de zoom");
   }, []);
 
   const handleBtcDominanceScreenClick = useCallback(() => {
     setZoomTarget(prev => prev === 'btcDominance' ? 'none' : 'btcDominance');
-    console.log("BitcoinDominanceScreen clicked - Animation de zoom");
   }, []);
 
   return (
     <>
       <Canvas camera={{ position: [0, 0, 8], fov: 60, near: 0.01, far: 500 }}>
-        {/* Affichage des FPS et statistiques de performance */}
         <Stats />
         
         {/* Contrôleur d'animation de caméra (indépendant de la scène) */}
@@ -428,7 +423,6 @@ const SpaceScene = () => {
           <ChartScreen 
             selectedPlanet={selectedPlanet} 
             onChartScreenClick={handleChartScreenClick}
-            useMotions={false}
             position={[0, 0, 0]} // Position relative dans le groupe parent
           />
         </EditableObject>
@@ -445,8 +439,7 @@ const SpaceScene = () => {
           <BuyCryptoScreen 
             selectedPlanet={selectedPlanet} 
             onBuyCryptoScreenClick={handleBuyCryptoScreenClick}
-            useMotions={false}
-            position={[0, 0, 0]} // Position relative dans le groupe parent
+            position={[0, 0, 0]}
             quaternion={createScreenQuaternion(-29.9, -59.5)}
           />
         </EditableObject>
@@ -462,8 +455,7 @@ const SpaceScene = () => {
         >
           <AltcoinMetricsScreen 
             onScreenClick={handleAltcoinMetricsScreenClick}
-            useMotions={false}
-            position={[0, 0, 0]} // Position relative dans le groupe parent
+            position={[0, 0, 0]}
             quaternion={createScreenQuaternion(-29.9, -59.5)}
           />
         </EditableObject>
@@ -480,8 +472,7 @@ const SpaceScene = () => {
           <CryptoDetailsScreen 
             selectedPlanet={selectedPlanet}
             onScreenClick={handleCryptoDetailsScreenClick}
-            useMotions={false}
-            position={[0, 0, 0]} // Position relative dans le groupe parent
+            position={[0, 0, 0]}
             quaternion={createScreenQuaternion(-29.9, 59.9)}
           />
         </EditableObject>
@@ -497,8 +488,7 @@ const SpaceScene = () => {
         >
           <BitcoinDominanceScreen 
             onScreenClick={handleBtcDominanceScreenClick}
-            useMotions={false}
-            position={[0, 0, 0]} // Position relative dans le groupe parent
+            position={[0, 0, 0]}
             quaternion={createScreenQuaternion(-29.9, 60)}
           />
         </EditableObject>
@@ -532,8 +522,8 @@ const SpaceScene = () => {
               className="holo-select-screen"
             >
               <option value="">Aucun</option>
-              <option value="chart">🖥️ Écran Principal</option>
-              <option value="buyCrypto">📱 Petit Écran Droite</option>
+              <option value="chart">🖥️ Chart</option>
+              <option value="buyCrypto">📱 Buy Crypto</option>
               <option value="altcoinMetrics">📊 Altcoin Metrics</option>
               <option value="cryptoDetails">💰 Crypto Details</option>
               <option value="btcDominance">₿ BTC Dominance</option>

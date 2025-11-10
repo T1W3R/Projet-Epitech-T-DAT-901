@@ -6,12 +6,10 @@ import "./BitcoinDominanceScreen.css";
 
 const BitcoinDominanceScreen = ({ 
   onScreenClick,
-  useMotions = false,
   position = [0, 0, 0],
   quaternion = undefined,
 }: { 
   onScreenClick?: () => void;
-  useMotions?: boolean;
   position?: [number, number, number];
   quaternion?: THREE.Quaternion | undefined;
 }) => {
@@ -27,27 +25,27 @@ const BitcoinDominanceScreen = ({
   // Données simulées pour la dominance (à remplacer par des vraies données API plus tard)
   const dominanceData = {
     bitcoin: {
-      percentage: 60.0,
-      change: "+1.88%",
-      color: "#ff9500"
+      percentage: 60,
+      change: "-0.23%",
+      color: "#F7931A"
     },
     ethereum: {
-      percentage: 11.9,
-      change: "-1.32%",
-      color: "#627eea"
+      percentage: 12.0,
+      change: "-0.27%",
+      color: "#627EEA" 
     },
     others: {
-      percentage: 28.1,
-      change: "-0.56%",
-      color: "#888888"
+      percentage: 28.0,
+      change: "+0.51%",
+      color: "#8A8A8A" 
     }
   };
 
   // Fonction pour formater les couleurs selon les variations
   const getChangeColor = (change: string) => {
-    if (change.startsWith('+')) return "#00ff88";
-    if (change.startsWith('-')) return "#ff4444";
-    return "#aaccff";
+    if (change.startsWith('+')) return "#00ff88"; // vert
+    if (change.startsWith('-')) return "#ff4444"; // rouge
+    return "#aaccff"; // gris
   };
 
   // Animation de scintillement holographique et oscillations
@@ -66,11 +64,6 @@ const BitcoinDominanceScreen = ({
       if (frameMaterial && 'opacity' in frameMaterial) {
         frameMaterial.opacity = 0.6 + Math.sin(time * 3) * 0.2;
       }
-    }
-
-    // Oscillations synchronisées avec le vaisseau
-    if (groupRef.current && useMotions) {
-      // Oscillations optionnelles
     }
   });
 
@@ -112,11 +105,13 @@ const BitcoinDominanceScreen = ({
       <Html
         transform
         position={[0, 0, 0]}
-        distanceFactor={0.13}
+        distanceFactor={0.11}
         style={{
-          width: '500px',
-          height: '300px',
+          width: '800px',
+          height: '600px',
           pointerEvents: 'auto',
+          display: 'flex',
+          alignItems: 'center'
         }}
       >
         <div
@@ -126,92 +121,96 @@ const BitcoinDominanceScreen = ({
             onScreenClick && onScreenClick();
           }}
         >
-          <h1 className="dominance-title">Dominance Bitcoin</h1>
+          {/* Titre */}
+          <h2 className="dominance-title">Bitcoin Dominance</h2>
 
-          {/* Légendes */}
-          <div className="dominance-legend">
-            <div className="legend-item">
+          <div className="dominance-grid">
+            {/* Bitcoin */}
+            <div className="dominance-item">
+              <div className="dominance-header">
+                <div 
+                  className="dominance-bullet" 
+                  style={{ backgroundColor: dominanceData.bitcoin.color }}
+                />
+                <span className="dominance-name">Bitcoin</span>
+              </div>
+              <div className="dominance-percentage">
+                {dominanceData.bitcoin.percentage.toFixed(1)}%
+              </div>
               <div 
-                className="legend-dot" 
-                style={{ backgroundColor: dominanceData.bitcoin.color }}
-              />
-              <span className="legend-label">Bitcoin</span>
-            </div>
-            <div className="legend-item">
-              <div 
-                className="legend-dot" 
-                style={{ backgroundColor: dominanceData.ethereum.color }}
-              />
-              <span className="legend-label">Ethereum</span>
-            </div>
-            <div className="legend-item">
-              <div 
-                className="legend-dot" 
-                style={{ backgroundColor: dominanceData.others.color }}
-              />
-              <span className="legend-label">Autres</span>
-            </div>
-          </div>
-
-          {/* Données */}
-          <div className="dominance-data">
-            <div className="data-item">
-              <div className="data-percentage">{dominanceData.bitcoin.percentage.toFixed(1)}%</div>
-              <div 
-                className="data-change" 
+                className="dominance-change" 
                 style={{ color: getChangeColor(dominanceData.bitcoin.change) }}
               >
-                {dominanceData.bitcoin.change}
+                {dominanceData.bitcoin.change.startsWith('+') ? '▲' : '▼'} {dominanceData.bitcoin.change.replace(/[+-]/, '')}
               </div>
             </div>
-            <div className="data-item">
-              <div className="data-percentage">{dominanceData.ethereum.percentage.toFixed(1)}%</div>
+
+            {/* Ethereum */}
+            <div className="dominance-item">
+              <div className="dominance-header">
+                <div 
+                  className="dominance-bullet" 
+                  style={{ backgroundColor: dominanceData.ethereum.color }}
+                />
+                <span className="dominance-name">Ethereum</span>
+              </div>
+              <div className="dominance-percentage">
+                {dominanceData.ethereum.percentage.toFixed(1)}%
+              </div>
               <div 
-                className="data-change" 
+                className="dominance-change" 
                 style={{ color: getChangeColor(dominanceData.ethereum.change) }}
               >
-                {dominanceData.ethereum.change}
+                {dominanceData.ethereum.change.startsWith('+') ? '▲' : '▼'} {dominanceData.ethereum.change.replace(/[+-]/, '')}
               </div>
             </div>
-            <div className="data-item">
-              <div className="data-percentage">{dominanceData.others.percentage.toFixed(1)}%</div>
+
+            {/* Others */}
+            <div className="dominance-item">
+              <div className="dominance-header">
+                <div 
+                  className="dominance-bullet" 
+                  style={{ backgroundColor: dominanceData.others.color }}
+                />
+                <span className="dominance-name">Others</span>
+              </div>
+              <div className="dominance-percentage">
+                {dominanceData.others.percentage.toFixed(1)}%
+              </div>
               <div 
-                className="data-change" 
+                className="dominance-change" 
                 style={{ color: getChangeColor(dominanceData.others.change) }}
               >
-                {dominanceData.others.change}
+                {dominanceData.others.change.startsWith('+') ? '▲' : '▼'} {dominanceData.others.change.replace(/[+-]/, '')}
               </div>
             </div>
           </div>
 
           {/* Barre de progression */}
-          <div className="dominance-bar">
-            <div 
-              className="bar-segment bitcoin-segment"
-              style={{ 
-                width: `${dominanceData.bitcoin.percentage}%`,
-                backgroundColor: dominanceData.bitcoin.color
-              }}
-            />
-            <div 
-              className="bar-segment ethereum-segment"
-              style={{ 
-                width: `${dominanceData.ethereum.percentage}%`,
-                backgroundColor: dominanceData.ethereum.color
-              }}
-            />
-            <div 
-              className="bar-segment others-segment"
-              style={{ 
-                width: `${dominanceData.others.percentage}%`,
-                backgroundColor: dominanceData.others.color
-              }}
-            />
-          </div>
-
-          {/* Info supplémentaire */}
-          <div className="dominance-info">
-            Total Market Cap: $2.8T
+          <div className="dominance-bar-container">
+            <div className="dominance-bar">
+              <div 
+                className="bar-segment bitcoin-bar"
+                style={{ 
+                  width: `${dominanceData.bitcoin.percentage}%`,
+                  backgroundColor: dominanceData.bitcoin.color
+                }}
+              />
+              <div 
+                className="bar-segment ethereum-bar"
+                style={{ 
+                  width: `${dominanceData.ethereum.percentage}%`,
+                  backgroundColor: dominanceData.ethereum.color
+                }}
+              />
+              <div 
+                className="bar-segment others-bar"
+                style={{ 
+                  width: `${dominanceData.others.percentage}%`,
+                  backgroundColor: dominanceData.others.color
+                }}
+              />
+            </div>
           </div>
         </div>
       </Html>

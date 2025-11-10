@@ -7,13 +7,11 @@ import "./CryptoDetailsScreen.css";
 const CryptoDetailsScreen = ({ 
   selectedPlanet,
   onScreenClick,
-  useMotions = false,
   position = [0, 0, 0],
   quaternion = undefined,
 }: { 
   selectedPlanet: string | null;
   onScreenClick?: () => void;
-  useMotions?: boolean;
   position?: [number, number, number];
   quaternion?: THREE.Quaternion | undefined;
 }) => {
@@ -28,15 +26,15 @@ const CryptoDetailsScreen = ({
 
   // Données simulées pour une crypto (à remplacer par des vraies données API plus tard)
   const cryptoData = {
-    marketCap: "408,59B $",
-    marketCapChange: "+1.98%",
-    volume24h: "37,58B $",
-    volumeChange: "-49.14%",
-    fdv: "408,6B $",
-    volMarketCapRatio: "9,35%",
-    totalSupply: "120,69M ETH",
+    marketCap: "$428.19B",
+    marketCapChange: "+0.2%",
+    volume24h: "$37.46B",
+    volumeChange: "+46.21%",
+    fdv: "$428.2B",
+    volMarketCapRatio: "8.76%",
+    totalSupply: "120.69M ETH",
     maxSupply: "∞",
-    circulatingSupply: "120,69M ETH"
+    circulatingSupply: "120.69M ETH"
   };
 
   // Fonction pour formater les couleurs selon les variations
@@ -62,11 +60,6 @@ const CryptoDetailsScreen = ({
       if (frameMaterial && 'opacity' in frameMaterial) {
         frameMaterial.opacity = 0.6 + Math.sin(time * 3) * 0.2;
       }
-    }
-
-    // Oscillations synchronisées avec le vaisseau
-    if (groupRef.current && useMotions) {
-      // Oscillations optionnelles
     }
   });
 
@@ -108,11 +101,13 @@ const CryptoDetailsScreen = ({
       <Html
         transform
         position={[0, 0, 0]}
-        distanceFactor={0.13}
+        distanceFactor={0.11}
         style={{
-          width: '500px',
-          height: '300px',
+          width: '850px',
+          height: '600px',
           pointerEvents: 'auto',
+          display: 'flex',
+          alignItems: 'center'
         }}
       >
         <div
@@ -124,95 +119,86 @@ const CryptoDetailsScreen = ({
         >
           {selectedPlanet ? (
             <>
-              {/* Titre */}
-              <h1 className="crypto-title">
-                {selectedPlanet}
-              </h1>
+              {/* Titre avec icône info */}
+              <div className="crypto-header">
+                <h2 className="crypto-title">{selectedPlanet}</h2>
+              </div>
 
-              {/* Grille des métriques */}
+              {/* Grille 3x3 des métriques */}
               <div className="metrics-grid">
-                {/* ROW 1: Cap. Marché - Full Width */}
-                <div className="metric-card-full">
-                  <div>
-                    <div className="metric-label-large">
-                      CAP. MARCHÉ
+                {/* ROW 1: Market Cap - Full Width (3 colonnes) */}
+                <div className="metric-card metric-card-full">
+                  <div className="metric-card-content">
+                    <div>
+                      <div className="metric-header">
+                        <span className="metric-label" style={{ marginBottom: '8px' }}>Market cap</span>
+                      </div>
+                      <div className="metric-value">{cryptoData.marketCap}</div>
                     </div>
-                    <div className="metric-value-large">
-                      {cryptoData.marketCap}
+                    <div 
+                      className="metric-change"
+                      style={{ color: getChangeColor(cryptoData.marketCapChange) }}
+                    >
+                      {cryptoData.marketCapChange.startsWith('+') ? '▲' : '▼'} {cryptoData.marketCapChange.replace(/[+-]/, '')}
                     </div>
-                  </div>
-                  <div 
-                    className="metric-change"
-                    style={{ color: getChangeColor(cryptoData.marketCapChange) }}
-                  >
-                    {cryptoData.marketCapChange}
                   </div>
                 </div>
 
                 {/* ROW 2: Volume (24h) */}
-                <div className="metric-card-turquoise">
-                  <div className="metric-label">
-                    VOLUME (24H)
+                <div className="metric-card">
+                  <div className="metric-header">
+                    <span className="metric-label">Volume (24h)</span>
                   </div>
-                  <div className="metric-value-medium">
-                    {cryptoData.volume24h}
-                  </div>
-                  <div 
-                    className="metric-change-small"
-                    style={{ color: getChangeColor(cryptoData.volumeChange) }}
-                  >
-                    {cryptoData.volumeChange}
+                  <div className="metric-card-content">
+                    <div className="metric-value">{cryptoData.volume24h}</div>
+                    <div 
+                      className="metric-change"
+                      style={{ color: getChangeColor(cryptoData.volumeChange) }}
+                    >
+                      {cryptoData.volumeChange.startsWith('+') ? '▲' : '▼'} {cryptoData.volumeChange.replace(/[+-]/, '')}
+                    </div>
                   </div>
                 </div>
 
                 {/* ROW 2: FDV */}
-                <div className="metric-card-turquoise">
-                  <div className="metric-label">
-                    FDV
+                <div className="metric-card">
+                  <div className="metric-header">
+                    <span className="metric-label">FDV</span>
                   </div>
-                  <div className="metric-value">
-                    {cryptoData.fdv}
-                  </div>
+                  <div className="metric-value">{cryptoData.fdv}</div>
                 </div>
 
-                {/* ROW 3: Vol/Mkt Cap (24h) */}
-                <div className="metric-card-purple">
-                  <div className="metric-label">
-                    VOL/MKT CAP (24H)
+                {/* ROW 2: Vol/Mkt Cap (24h) */}
+                <div className="metric-card">
+                  <div className="metric-header">
+                    <span className="metric-label">Vol/Mkt Cap (24h)</span>
                   </div>
-                  <div className="metric-value">
-                    {cryptoData.volMarketCapRatio}
-                  </div>
+                  <div className="metric-value">{cryptoData.volMarketCapRatio}</div>
                 </div>
 
-                {/* ROW 3: Offre Totale */}
-                <div className="metric-card-purple">
-                  <div className="metric-label">
-                    OFFRE TOTALE
+                {/* ROW 3: Max Supply */}
+                <div className="metric-card">
+                  <div className="metric-header">
+                    <span className="metric-label">Max supply</span>
                   </div>
-                  <div className="metric-value-small">
-                    {cryptoData.totalSupply}
-                  </div>
+                  <div className="metric-value">{cryptoData.maxSupply}</div>
                 </div>
 
-                {/* ROW 4: Offre max. */}
-                <div className="metric-card-orange">
-                  <div className="metric-label">
-                    OFFRE MAX.
+
+                {/* ROW 3: Total Supply */}
+                <div className="metric-card">
+                  <div className="metric-header">
+                    <span className="metric-label">Total supply</span>
                   </div>
-                  <div className="metric-value">
-                    {cryptoData.maxSupply}
-                  </div>
+                  <div className="metric-value metric-value">{cryptoData.totalSupply}</div>
                 </div>
 
-                {/* ROW 4: Offre en circulation */}
-                <div className="metric-card-orange">
-                  <div className="metric-label">
-                    OFFRE EN CIRCULATION
+                {/* ROW 3: Circulating Supply */}
+                <div className="metric-card">
+                  <div className="metric-header">
+                    <span className="metric-label">Circulating supply</span>
                   </div>
-                  <div className="metric-value-small">
-                    {cryptoData.circulatingSupply}
-                  </div>
+                  <div className="metric-value metric-value">{cryptoData.circulatingSupply}</div>
                 </div>
               </div>
             </>

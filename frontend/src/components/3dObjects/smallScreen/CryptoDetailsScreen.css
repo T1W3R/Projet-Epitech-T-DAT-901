@@ -1,148 +1,133 @@
+/* Container principal */
 .crypto-details-container {
   width: 100%;
-  height: 100%;
   display: flex;
+  justify-self: center;
   flex-direction: column;
-  font-family: monospace;
-  color: white;
-  padding: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #ffffff;
+  padding: 25px 30px;
   box-sizing: border-box;
+  cursor: pointer;
   user-select: none;
+  background: rgba(26, 31, 48, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
+  gap: 25px;
 }
 
-.crypto-details-container:hover {
-  cursor: pointer;
+/* Header avec titre et sous-titre */
+.crypto-header {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .crypto-title {
-  margin: 0 0 12px 0;
-  font-size: 24px;
-  color: #00ffff;
-  text-align: center;
-  text-shadow: 0 0 10px #00ffff;
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: 0.5px;
 }
 
+/* Grille 3x3 des métriques */
 .metrics-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  flex: 1;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
-/* Carte de métrique - Cap. Marché (Full Width) */
+/* Carte métrique */
+.metric-card {
+  background: rgba(30, 35, 50, 0.6);
+  border: 2px solid rgba(60, 70, 90, 0.5);
+  border-radius: 8px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.metric-card:hover {
+  border-color: rgba(0, 255, 255, 0.3);
+}
+
+/* Carte full width (Market Cap sur 3 colonnes) */
 .metric-card-full {
   grid-column: 1 / -1;
-  background: rgba(0, 255, 255, 0.1);
-  border: 1px solid rgba(0, 255, 255, 0.6);
-  border-radius: 8px;
-  padding: 10px 12px;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.metric-card-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
-/* Cartes de métriques - Row 2 (Turquoise) */
-.metric-card-turquoise {
-  background: rgba(0, 221, 170, 0.08);
-  border: 1px solid rgba(0, 221, 170, 0.5);
-  border-radius: 8px;
-  padding: 8px 10px;
-  box-shadow: 0 0 10px rgba(0, 221, 170, 0.2);
-}
-
-/* Cartes de métriques - Row 3 (Violet) */
-.metric-card-purple {
-  background: rgba(170, 0, 255, 0.08);
-  border: 1px solid rgba(170, 0, 255, 0.5);
-  border-radius: 8px;
-  padding: 8px 10px;
-  box-shadow: 0 0 10px rgba(170, 0, 255, 0.2);
-}
-
-/* Cartes de métriques - Row 4 (Orange) */
-.metric-card-orange {
-  background: rgba(255, 136, 0, 0.08);
-  border: 1px solid rgba(255, 136, 0, 0.5);
-  border-radius: 8px;
-  padding: 8px 10px;
-  box-shadow: 0 0 10px rgba(255, 136, 0, 0.2);
+/* Header de la carte */
+.metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .metric-label {
-  font-size: 10px;
-  color: #66ccff;
-  margin-bottom: 4px;
+  font-size: 22px;
+  color: #a0aec0;
+  font-weight: 500;
+  flex: 1;
 }
 
+/* Valeur principale */
 .metric-value {
-  font-size: 16px;
-}
-
-.metric-value-large {
-  font-size: 20px;
+  font-size: 26px;
   font-weight: bold;
+  color: #ffffff;
+  line-height: 1;
 }
 
-.metric-value-medium {
-  font-size: 16px;
-  margin-bottom: 2px;
-}
-
-.metric-value-small {
-  font-size: 14px;
-}
-
+/* Variation */
 .metric-change {
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.metric-change-small {
-  font-size: 13px;
-}
-
-.metric-label-large {
-  font-size: 11px;
-  color: #66ccff;
-  margin-bottom: 4px;
-}
-
-/* État vide - pas de planète sélectionnée */
+/* État vide (quand aucune planète sélectionnée) */
 .empty-state {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   height: 100%;
-  gap: 10px;
+  gap: 15px;
+  padding: 40px 20px;
 }
 
 .empty-state-title {
-  font-size: 18px;
-  color: #666699;
+  font-size: 38px;
+  color: #00ffff;
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
 .empty-state-subtitle {
-  font-size: 16px;
-  color: #4488aa;
+  font-size: 28px;
+  color: #a0aec0;
+  text-shadow: 0 0 8px rgba(160, 174, 192, 0.5);
 }
 
 .empty-state-text {
-  font-size: 14px;
-  color: #335577;
-}
-
-/* Couleurs pour les variations */
-.color-positive {
-  color: #00ff88;
-}
-
-.color-negative {
-  color: #ff4444;
-}
-
-.color-neutral {
-  color: #aaccff;
+  font-size: 22px;
+  color: #718096;
+  text-shadow: 0 0 6px rgba(113, 128, 150, 0.5);
 }
 
