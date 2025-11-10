@@ -3,24 +3,20 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 
-const SmallHoloScreen = ({ 
+const ChartScreen = ({ 
   selectedPlanet, 
-  onSmallHoloScreenClick,
+  onChartScreenClick,
   useMotions = false,
-  position = [0, 0, 0],
-  quaternion = undefined,
+  position = [0, 0, 0]
 }: { 
   selectedPlanet: string | null;
-  onSmallHoloScreenClick?: () => void;
+  onChartScreenClick?: () => void;
   useMotions?: boolean;
   position?: [number, number, number];
-  quaternion?: THREE.Quaternion | undefined;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frameRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-
-  const BASE_SCALE: [number, number, number] = [0.105, 0.10, 1];
   
   // Positions de base pour l'écran holographique
   const basePosition: [number, number, number] = position;
@@ -45,23 +41,23 @@ const SmallHoloScreen = ({
 
     // Oscillations synchronisées avec le vaisseau
     if (groupRef.current && useMotions) {
-    //   // Même oscillation de rotation sur l'axe Z que le vaisseau et l'axe X
-    //   groupRef.current.rotation.z -= Math.sin(time * 1) * 0.0005;
-    //   groupRef.current.position.x -= Math.sin(time * 1) * 0.0002;
+      // Même oscillation de rotation sur l'axe Z que le vaisseau et l'axe X
+      groupRef.current.rotation.z -= Math.sin(time * 1) * 0.0005;
+      groupRef.current.position.x -= Math.sin(time * 1) * 0.0002;
 
-    //   // Même oscillation de position sur l'axe Y que le vaisseau
-    //   groupRef.current.position.y = basePosition[1] + Math.sin(time * 1) * 0.05;
+      // Même oscillation de position sur l'axe Y que le vaisseau
+      groupRef.current.position.y = basePosition[1] + Math.sin(time * 1) * 0.05;
     }
   });
 
   return (
-    <group ref={groupRef} position={basePosition} quaternion={quaternion}>
+    <group ref={groupRef} position={basePosition}>
       {/* Zone cliquable invisible pour toute l'interface */}
       <mesh 
         position={[0, 0, 0.01]}
         onClick={(e) => {
           e.stopPropagation();
-          onSmallHoloScreenClick && onSmallHoloScreenClick();
+          onChartScreenClick && onChartScreenClick();
         }}
         onPointerOver={(e) => {
           e.stopPropagation();
@@ -80,7 +76,7 @@ const SmallHoloScreen = ({
         ref={frameRef}
         position={[0, 0, -0.01]} 
         rotation={[0, 0, 0]}
-        scale={BASE_SCALE}
+        scale={[0.18, 0.15, 1]}
       >
         <planeGeometry args={[2.7, 1.7]} />
         <meshBasicMaterial
@@ -94,9 +90,9 @@ const SmallHoloScreen = ({
       {/* Écran holographique principal */}
       <mesh 
         ref={meshRef}
-        position={[0, 0, -0.008]} 
+        position={[0, 0, 0]} 
         rotation={[0, 0, 0]}
-        scale={BASE_SCALE}
+        scale={[0.18, 0.15, 1]}
       >
         <planeGeometry args={[2.5, 1.5]} />
         <meshBasicMaterial
@@ -131,20 +127,20 @@ const SmallHoloScreen = ({
                 <Text 
                   position={[0, -1, 0]}
                   fontSize={0.75} 
-                  color="#00ff00"
+                  color="#ffaa00"
                   anchorX="center"
                   anchorY="middle"
                 >
-                  Achetez
+                  Variation: +2.4%
                 </Text>
                 <Text 
                   position={[0, -2, 0]}
                   fontSize={0.75} 
-                  color="#ff0000"
+                  color="#ff6600"
                   anchorX="center"
                   anchorY="middle"
                 >
-                  Vendre
+                  Volume: 2.1B $
                 </Text>
               </>
             ) : (
@@ -174,7 +170,7 @@ const SmallHoloScreen = ({
                   anchorX="center"
                   anchorY="middle"
                 >
-                  pour afficher des données supplémentaires
+                  pour afficher les données principales
                 </Text>
               </>
             )}
@@ -185,4 +181,4 @@ const SmallHoloScreen = ({
   );
 };
 
-export default SmallHoloScreen;
+export default ChartScreen;
