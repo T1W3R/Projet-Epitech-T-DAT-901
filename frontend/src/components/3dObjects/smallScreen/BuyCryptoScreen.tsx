@@ -7,13 +7,11 @@ import "./BuyCryptoScreen.css";
 const BuyCryptoScreen = ({ 
   selectedPlanet, 
   onBuyCryptoScreenClick,
-  useMotions = false,
   position = [0, 0, 0],
   quaternion = undefined,
 }: { 
   selectedPlanet: string | null;
   onBuyCryptoScreenClick?: () => void;
-  useMotions?: boolean;
   position?: [number, number, number];
   quaternion?: THREE.Quaternion | undefined;
 }) => {
@@ -25,6 +23,21 @@ const BuyCryptoScreen = ({
   
   // Positions de base pour l'écran holographique
   const basePosition: [number, number, number] = position;
+
+  // Données de prix simulées
+  const priceData = {
+    currentPrice: "$45,123.89",
+    priceChange: "+2.34%",
+    high24h: "$46,234.12",
+    low24h: "$44,012.45"
+  };
+
+  // Fonction pour formater les couleurs selon les variations
+  const getChangeColor = (change: string) => {
+    if (change.startsWith('+')) return "#00ff88"; // vert
+    if (change.startsWith('-')) return "#ff4444"; // rouge
+    return "#aaccff"; // gris
+  };
 
   // Animation de scintillement holographique et oscillations
   useFrame((state) => {
@@ -42,11 +55,6 @@ const BuyCryptoScreen = ({
       if (frameMaterial && 'opacity' in frameMaterial) {
         frameMaterial.opacity = 0.6 + Math.sin(time * 3) * 0.2;
       }
-    }
-
-    // Oscillations synchronisées avec le vaisseau
-    if (groupRef.current && useMotions) {
-      // Oscillations optionnelles
     }
   });
 
@@ -88,11 +96,13 @@ const BuyCryptoScreen = ({
       <Html
         transform
         position={[0, 0, 0]}
-        distanceFactor={0.13}
+        distanceFactor={0.11}
         style={{
-          width: '500px',
-          height: '300px',
+          width: '800px',
+          height: '600px',
           pointerEvents: 'auto',
+          display: 'flex',
+          alignItems: 'center'
         }}
       >
         <div
@@ -104,33 +114,54 @@ const BuyCryptoScreen = ({
         >
           {selectedPlanet ? (
             <>
-              <h1 className="buy-crypto-title">
-                {selectedPlanet}
-              </h1>
-              
-              <div className="buy-crypto-price">
-                Prix: $45,123.89
+              {/* Header avec nom de la crypto */}
+              <div className="buy-crypto-header">
+                <h2 className="buy-crypto-title">{selectedPlanet}</h2>
               </div>
 
+              {/* Prix actuel et variation */}
+              <div className="price-section">
+                <div className="current-price">{priceData.currentPrice}</div>
+                <div 
+                  className="price-change"
+                  style={{ color: getChangeColor(priceData.priceChange) }}
+                >
+                  {priceData.priceChange.startsWith('+') ? '▲' : '▼'} {priceData.priceChange.replace(/[+-]/, '')}
+                </div>
+              </div>
+
+              {/* Stats 24h */}
+              <div className="stats-grid">
+                <div className="stat-item">
+                  <div className="stat-label">24h High</div>
+                  <div className="stat-value">{priceData.high24h}</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-label">24h Low</div>
+                  <div className="stat-value">{priceData.low24h}</div>
+                </div>
+              </div>
+
+              {/* Boutons d'action */}
               <div className="buy-crypto-actions">
                 <button className="buy-button">
-                  Achetez
+                  <span className="button-text">Buy</span>
                 </button>
                 <button className="sell-button">
-                  Vendre
+                  <span className="button-text">Sell</span>
                 </button>
               </div>
             </>
           ) : (
             <div className="buy-crypto-empty-state">
               <div className="buy-crypto-empty-title">
-                [ SYSTÈME SPATIAL ]
+                [ TRADING ]
               </div>
               <div className="buy-crypto-empty-subtitle">
                 Sélectionnez une planète
               </div>
               <div className="buy-crypto-empty-text">
-                pour afficher des données supplémentaires
+                pour trader
               </div>
             </div>
           )}

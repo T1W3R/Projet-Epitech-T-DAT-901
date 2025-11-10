@@ -4,72 +4,198 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Courier New', monospace;
+  align-items: stretch;
+  justify-content: space-evenly;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #ffffff;
-  padding: 20px;
+  padding: 15px 20px;
   box-sizing: border-box;
   cursor: pointer;
   user-select: none;
-  gap: 15px;
 }
 
-/* Titre principal */
-.metrics-main-title {
-  font-size: 28px;
-  font-weight: bold;
-  margin: 0 0 15px 0;
-  color: #00ffff;
-  text-shadow: 
-    0 0 10px rgba(0, 255, 255, 0.8),
-    0 0 20px rgba(0, 255, 255, 0.5);
-  letter-spacing: 2px;
+/* ===== SECTION FEAR & GREED ===== */
+.fear-greed-section {
+  height: 35%;
+  background: rgba(26, 31, 48, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
 }
 
-/* Section */
-.metrics-section {
+.fear-greed-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.fear-greed-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+/* Gauge circulaire */
+.gauge-container {
+  position: relative;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+}
+
+.gauge-svg {
+  width: 190px;
+  height: 130px;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.gauge-arc {
+  transition: stroke 0.3s ease, stroke-dashoffset 0.8s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.gauge-value {
+  position: absolute;
+  bottom: 15px;
+  text-align: center;
+}
+
+.gauge-number {
+  font-size: 38px;
+  font-weight: bold;
+  color: #ffffff;
+  line-height: 1;
+  text-shadow: 0 0 10px currentColor;
+}
+
+.gauge-label {
+  font-size: 20px;
+  color: #a0aec0;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* ===== SECTION ALTCOIN SEASON ===== */
+.altcoin-season-section {
+  height: 35%;
+  background: rgba(26, 31, 48, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
+}
+
+.altcoin-season-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.altcoin-season-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.altcoin-season-value {
+  margin-bottom: 18px;
+}
+
+.season-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.season-total {
+  font-size: 28px;
+  color: #718096;
+  margin-left: 6px;
+}
+
+/* Barre de progression */
+.season-bar-container {
   width: 100%;
 }
 
-/* Titre de section */
-.metrics-section-title {
-  font-size: 18px;
-  color: #aaccff;
-  text-shadow: 0 0 8px rgba(170, 204, 255, 0.5);
-  font-weight: 600;
-  letter-spacing: 1px;
+.season-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 24px;
+  color: #a0aec0;
+  font-weight: 500;
 }
 
-/* Valeur large */
-.metrics-value-large {
-  font-size: 38px;
-  font-weight: bold;
-  text-shadow: 
-    0 0 12px currentColor,
-    0 0 24px currentColor;
-  margin: 5px 0;
+.season-label-left {
+  color: #EA3943;
 }
 
-/* Label */
-.metrics-label {
-  font-size: 16px;
-  font-weight: 600;
-  text-shadow: 0 0 8px currentColor;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+.season-label-right {
+  color: #16C784;
 }
 
-/* Séparateur */
-.metrics-separator {
-  font-size: 14px;
-  color: #335577;
-  text-shadow: 0 0 6px rgba(51, 85, 119, 0.5);
-  margin: 5px 0;
-  letter-spacing: 2px;
+.season-bar-track {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: rgba(42, 46, 57, 0.8);
+  border-radius: 4px;
+  overflow: visible;
 }
 
+.season-bar-gradient {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, #EA3943 0%, #F3BA2F 50%, #16C784 100%);
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+.season-bar-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: left 0.3s ease;
+}
+
+.season-bar-thumb-circle {
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border: 3px solid #00ffff;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 8px rgba(0, 255, 255, 0.6),
+    0 0 16px rgba(0, 255, 255, 0.4);
+  animation: thumbPulse 2s ease-in-out infinite;
+}
+
+@keyframes thumbPulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 
+      0 0 8px rgba(0, 255, 255, 0.6),
+      0 0 16px rgba(0, 255, 255, 0.4);
+  }
+  50% { 
+    transform: scale(1.1);
+    box-shadow: 
+      0 0 12px rgba(0, 255, 255, 0.8),
+      0 0 24px rgba(0, 255, 255, 0.6);
+  }
+}

@@ -1,114 +1,179 @@
 /* Container principal */
 .buy-crypto-container {
   width: 100%;
-  height: 100%;
   display: flex;
+  justify-self: center;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Courier New', monospace;
-  color: #00ffff;
-  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #ffffff;
+  padding: 25px 30px;
   box-sizing: border-box;
   cursor: pointer;
   user-select: none;
+  background: rgba(26, 31, 48, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
+  gap: 25px;
 }
 
-/* Titre */
+/* Header avec titre */
+.buy-crypto-header {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .buy-crypto-title {
-  font-size: 42px;
-  font-weight: bold;
-  margin: 0 0 30px 0;
-  color: #00ffff;
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
-  letter-spacing: 2px;
-}
-
-/* Prix */
-.buy-crypto-price {
-  font-size: 28px;
-  color: #00ff88;
-  margin-bottom: 40px;
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.8);
+  font-size: 32px;
   font-weight: 600;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: 0.5px;
 }
 
-/* Actions */
+/* Section prix */
+.price-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(60, 70, 90, 0.5);
+}
+
+.current-price {
+  font-size: 38px;
+  font-weight: bold;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.price-change {
+  font-size: 24px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Grille des stats 24h */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.stat-item {
+  background: rgba(30, 35, 50, 0.6);
+  border: 2px solid rgba(60, 70, 90, 0.5);
+  border-radius: 8px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.stat-item:hover {
+  border-color: rgba(0, 255, 255, 0.3);
+}
+
+.stat-label {
+  font-size: 22px;
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: bold;
+  color: #ffffff;
+  line-height: 1;
+}
+
+/* Boutons d'action */
 .buy-crypto-actions {
   display: flex;
-  gap: 30px;
+  gap: 20px;
   width: 100%;
-  justify-content: center;
+  margin-top: 10px;
 }
 
 /* Boutons */
 .buy-button,
 .sell-button {
-  padding: 15px 40px;
-  font-size: 20px;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
+  flex: 1;
+  padding: 18px 30px;
+  font-size: 22px;
+  font-weight: 700;
   border: 2px solid;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(5px);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .buy-button {
-  color: #00ff00;
-  border-color: #00ff00;
-  text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+  color: #ffffff;
+  background: #16c784;
+  border-color: #16c784;
 }
 
 .buy-button:hover {
-  background: rgba(0, 255, 0, 0.2);
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
-  transform: scale(1.05);
+  background: #1ed896;
+  border-color: #1ed896;
+  box-shadow: 0 4px 12px rgba(22, 199, 132, 0.4);
+  transform: translateY(-2px);
 }
 
 .sell-button {
-  color: #ff0000;
-  border-color: #ff0000;
-  text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+  color: #ffffff;
+  background: #ea3943;
+  border-color: #ea3943;
 }
 
 .sell-button:hover {
-  background: rgba(255, 0, 0, 0.2);
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
-  transform: scale(1.05);
+  background: #f4516a;
+  border-color: #f4516a;
+  box-shadow: 0 4px 12px rgba(234, 57, 67, 0.4);
+  transform: translateY(-2px);
 }
 
-/* État vide */
+.button-text {
+  display: block;
+}
+
+/* État vide (quand aucune planète sélectionnée) */
 .buy-crypto-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  text-align: center;
+  height: 100%;
+  gap: 15px;
+  padding: 40px 20px;
 }
 
 .buy-crypto-empty-title {
-  font-size: 24px;
-  color: #666699;
+  font-size: 38px;
+  color: #00ffff;
   font-weight: bold;
   letter-spacing: 3px;
-  text-shadow: 0 0 10px rgba(102, 102, 153, 0.5);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
 .buy-crypto-empty-subtitle {
-  font-size: 22px;
-  color: #4488aa;
-  text-shadow: 0 0 8px rgba(68, 136, 170, 0.5);
+  font-size: 28px;
+  color: #a0aec0;
+  text-shadow: 0 0 8px rgba(160, 174, 192, 0.5);
 }
 
 .buy-crypto-empty-text {
-  font-size: 18px;
-  color: #335577;
-  text-shadow: 0 0 6px rgba(51, 85, 119, 0.5);
+  font-size: 22px;
+  color: #718096;
+  text-shadow: 0 0 6px rgba(113, 128, 150, 0.5);
 }
 

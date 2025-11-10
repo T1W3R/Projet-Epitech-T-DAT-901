@@ -6,7 +6,6 @@ import "./AltcoinMetricsScreen.css";
 
 const AltcoinMetricsScreen = ({ 
   onScreenClick,
-  useMotions = false,
   position = [0, 0, 0],
   quaternion = undefined,
 }: { 
@@ -25,16 +24,16 @@ const AltcoinMetricsScreen = ({
   const basePosition: [number, number, number] = position;
 
   // Données simulées (à remplacer par des vraies données API plus tard)
-  const fearGreedIndex = 72; // 0-100
-  const altcoinSeasonIndex = 65; // 0-100
+  const fearGreedIndex = 30; // 0-100
+  const altcoinSeasonIndex = 25; // 0-100
 
   // Déterminer la couleur selon l'indice Fear & Greed
   const getFearGreedColor = (value: number) => {
-    if (value <= 25) return "#ff0000"; // Extreme Fear - Rouge
-    if (value <= 45) return "#ff6600"; // Fear - Orange
-    if (value <= 55) return "#ffaa00"; // Neutral - Jaune
-    if (value <= 75) return "#88ff00"; // Greed - Vert clair
-    return "#00ff00"; // Extreme Greed - Vert
+    if (value <= 25) return "#EA3943"; // Extreme Fear - Rouge
+    if (value <= 45) return "#FF6B00"; // Fear - Orange
+    if (value <= 55) return "#F3BA2F"; // Neutral - Jaune
+    if (value <= 75) return "#93D900"; // Greed - Vert clair
+    return "#16C784"; // Extreme Greed - Vert
   };
 
   const getFearGreedLabel = (value: number) => {
@@ -45,19 +44,13 @@ const AltcoinMetricsScreen = ({
     return "Extreme Greed";
   };
 
-  // Déterminer la couleur selon l'indice de saison des altcoins
-  const getAltcoinSeasonColor = (value: number) => {
-    if (value < 25) return "#ff4444"; // Bitcoin season
-    if (value < 50) return "#ffaa44"; // Bitcoin/Altcoin mix
-    if (value < 75) return "#88ff44"; // Early Altcoin season
-    return "#00ff88"; // Full Altcoin season
-  };
-
-  const getAltcoinSeasonLabel = (value: number) => {
-    if (value < 25) return "Bitcoin Season";
-    if (value < 50) return "Mixed Season";
-    if (value < 75) return "Early Altcoin";
-    return "Altcoin Season";
+  // Path complet du gauge (arc de 180°)
+  const fullGaugeArc = "M 5 50 A 45 45 0 0 1 95 50";
+  const arcLength = Math.PI * 45;
+  
+  const getStrokeDashoffset = (value: number) => {
+    const p = Math.max(0, Math.min(100, value));
+    return arcLength * (1 - p / 100);
   };
 
   // Animation de scintillement holographique et oscillations
@@ -76,11 +69,6 @@ const AltcoinMetricsScreen = ({
       if (frameMaterial && 'opacity' in frameMaterial) {
         frameMaterial.opacity = 0.6 + Math.sin(time * 3) * 0.2;
       }
-    }
-
-    // Oscillations synchronisées avec le vaisseau
-    if (groupRef.current && useMotions) {
-      // Oscillations optionnelles
     }
   });
 
@@ -122,10 +110,10 @@ const AltcoinMetricsScreen = ({
       <Html
         transform
         position={[0, 0, 0]}
-        distanceFactor={0.13}
+        distanceFactor={0.11}
         style={{
-          width: '500px',
-          height: '300px',
+          width: '800px',
+          height: '600px',
           pointerEvents: 'auto',
         }}
       >
@@ -136,42 +124,69 @@ const AltcoinMetricsScreen = ({
             onScreenClick && onScreenClick();
           }}
         >
-          <h1 className="metrics-main-title">[ MARKET METRICS ]</h1>
-
-          {/* Section Fear & Greed Index */}
-          <div className="metrics-section">
-            <div className="metrics-section-title">Fear & Greed Index</div>
-            <div 
-              className="metrics-value-large"
-              style={{ color: getFearGreedColor(fearGreedIndex) }}
-            >
-              {fearGreedIndex}
+          {/* Section Fear & Greed Index avec Gauge */}
+          <div className="fear-greed-section">
+            <div className="fear-greed-header">
+              <span className="fear-greed-title">Fear & Greed</span>
             </div>
-            <div 
-              className="metrics-label"
-              style={{ color: getFearGreedColor(fearGreedIndex) }}
-            >
-              {getFearGreedLabel(fearGreedIndex)}
+            
+            <div className="gauge-container">
+              <svg viewBox="0 0 100 60" className="gauge-svg">
+                {/* Fond du gauge (arc gris) */}
+                <path
+                  d="M 5 50 A 45 45 0 0 1 95 50"
+                  fill="none"
+                  stroke="#2a2e39"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                />
+                
+                {/* Arc coloré selon la valeur avec animation */}
+                <path
+                  d={fullGaugeArc}
+                  fill="none"
+                  stroke={getFearGreedColor(fearGreedIndex)}
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={arcLength}
+                  strokeDashoffset={getStrokeDashoffset(fearGreedIndex)}
+                  className="gauge-arc"
+                />
+              </svg>
+              
+              <div className="gauge-value">
+                <div className="gauge-number">{fearGreedIndex}</div>
+                <div className="gauge-label">{getFearGreedLabel(fearGreedIndex)}</div>
+              </div>
             </div>
           </div>
 
-          {/* Séparateur */}
-          <div className="metrics-separator">───────────</div>
-
-          {/* Section Altcoin Season Index */}
-          <div className="metrics-section">
-            <div className="metrics-section-title">Altcoin Season Index</div>
-            <div 
-              className="metrics-value-large"
-              style={{ color: getAltcoinSeasonColor(altcoinSeasonIndex) }}
-            >
-              {altcoinSeasonIndex}
+          {/* Section Altcoin Season avec barre horizontale */}
+          <div className="altcoin-season-section">
+            <div className="altcoin-season-header">
+              <span className="altcoin-season-title">Altcoin season</span>
             </div>
-            <div 
-              className="metrics-label"
-              style={{ color: getAltcoinSeasonColor(altcoinSeasonIndex) }}
-            >
-              {getAltcoinSeasonLabel(altcoinSeasonIndex)}
+            
+            <div className="altcoin-season-value">
+              <span className="season-number">{altcoinSeasonIndex}</span>
+              <span className="season-total">/ 100</span>
+            </div>
+            
+            <div className="season-bar-container">
+              <div className="season-labels">
+                <span className="season-label-left">Bitcoin</span>
+                <span className="season-label-right">Altcoin</span>
+              </div>
+              
+              <div className="season-bar-track">
+                <div className="season-bar-gradient" />
+                <div 
+                  className="season-bar-thumb"
+                  style={{ left: `${altcoinSeasonIndex}%` }}
+                >
+                  <div className="season-bar-thumb-circle" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -181,4 +196,5 @@ const AltcoinMetricsScreen = ({
 };
 
 export default AltcoinMetricsScreen;
+
 
