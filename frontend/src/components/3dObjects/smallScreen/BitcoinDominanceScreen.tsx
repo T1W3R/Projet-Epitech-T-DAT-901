@@ -1,7 +1,8 @@
-import { RenderTexture, Text, PerspectiveCamera } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
+import "./BitcoinDominanceScreen.css";
 
 const BitcoinDominanceScreen = ({ 
   onScreenClick,
@@ -75,25 +76,6 @@ const BitcoinDominanceScreen = ({
 
   return (
     <group ref={groupRef} position={basePosition} quaternion={quaternion}>
-      {/* Zone cliquable invisible pour toute l'interface */}
-      <mesh 
-        position={[0, 0, 0.01]}
-        onClick={(e) => {
-          e.stopPropagation();
-          onScreenClick && onScreenClick();
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          document.body.style.cursor = 'pointer';
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = 'default';
-        }}
-      >
-        <planeGeometry args={[0.5, 0.25]} />
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
-
       {/* Cadre holographique lumineux */}
       <mesh 
         ref={frameRef}
@@ -110,7 +92,7 @@ const BitcoinDominanceScreen = ({
         />
       </mesh>
 
-      {/* Écran holographique principal */}
+      {/* Écran avec fond */}
       <mesh 
         ref={meshRef}
         position={[0, 0, -0.008]} 
@@ -119,179 +101,120 @@ const BitcoinDominanceScreen = ({
       >
         <planeGeometry args={[2.5, 1.5]} />
         <meshBasicMaterial
+          color="#000a1a"
           transparent
           opacity={0.85}
           side={THREE.DoubleSide}
-        >
-          <RenderTexture attach="map" anisotropy={16}>
-            <PerspectiveCamera makeDefault position={[0, 0, 10]} />
-            <color attach="background" args={["#000a1a"]} />
-            <ambientLight intensity={0.8} />
-            
-            {/* Titre */}
-            <Text 
-              position={[0, 3.5, 0]}
-              fontSize={1.2} 
-              color="#00ffff"
-              anchorX="center"
-              anchorY="middle"
-            >
-              Dominance Bitcoin
-            </Text>
-
-            {/* Bitcoin */}
-            <group position={[-3.5, 1.8, 0]}>
-              <mesh position={[0.35, 0, 0]}>
-                <circleGeometry args={[0.15, 16]} />
-                <meshBasicMaterial color={dominanceData.bitcoin.color} />
-              </mesh>
-              <Text 
-                position={[0.8, 0, 0]}
-                fontSize={0.65} 
-                color="#ffffff"
-                anchorX="left"
-                anchorY="middle"
-              >
-                Bitcoin
-              </Text>
-            </group>
-
-            {/* Ethereum */}
-            <group position={[0.2, 1.8, 0]}>
-              <mesh position={[0.35, 0, 0]}>
-                <circleGeometry args={[0.15, 16]} />
-                <meshBasicMaterial color={dominanceData.ethereum.color} />
-              </mesh>
-              <Text 
-                position={[0.8, 0, 0]}
-                fontSize={0.65} 
-                color="#ffffff"
-                anchorX="left"
-                anchorY="middle"
-              >
-                Ethereum
-              </Text>
-            </group>
-
-            {/* Autres */}
-            <group position={[3.8, 1.8, 0]}>
-              <mesh position={[0.35, 0, 0]}>
-                <circleGeometry args={[0.15, 16]} />
-                <meshBasicMaterial color={dominanceData.others.color} />
-              </mesh>
-              <Text 
-                position={[0.8, 0, 0]}
-                fontSize={0.65} 
-                color="#ffffff"
-                anchorX="left"
-                anchorY="middle"
-              >
-                Autres
-              </Text>
-            </group>
-
-            {/* Pourcentages */}
-            <Text 
-              position={[-3.5, 0.8, 0]}
-              fontSize={1.2} 
-              color="#ffffff"
-              anchorX="left"
-              anchorY="middle"
-            >
-              {dominanceData.bitcoin.percentage.toFixed(1)}%
-            </Text>
-
-            <Text 
-              position={[0.2, 0.8, 0]}
-              fontSize={1.2} 
-              color="#ffffff"
-              anchorX="left"
-              anchorY="middle"
-            >
-              {dominanceData.ethereum.percentage.toFixed(1)}%
-            </Text>
-
-            <Text 
-              position={[3.8, 0.8, 0]}
-              fontSize={1.2} 
-              color="#ffffff"
-              anchorX="left"
-              anchorY="middle"
-            >
-              {dominanceData.others.percentage.toFixed(1)}%
-            </Text>
-
-            {/* Variations */}
-            <Text 
-              position={[-3.5, 0.1, 0]}
-              fontSize={0.6} 
-              color={getChangeColor(dominanceData.bitcoin.change)}
-              anchorX="left"
-              anchorY="middle"
-            >
-              {dominanceData.bitcoin.change}
-            </Text>
-
-            <Text 
-              position={[0.2, 0.1, 0]}
-              fontSize={0.6} 
-              color={getChangeColor(dominanceData.ethereum.change)}
-              anchorX="left"
-              anchorY="middle"
-            >
-              {dominanceData.ethereum.change}
-            </Text>
-
-            <Text 
-              position={[3.8, 0.1, 0]}
-              fontSize={0.6} 
-              color={getChangeColor(dominanceData.others.change)}
-              anchorX="left"
-              anchorY="middle"
-            >
-              {dominanceData.others.change}
-            </Text>
-
-            {/* Barre de progression composite */}
-            <group position={[0, -1.5, 0]}>
-              {/* Fond de la barre */}
-              <mesh position={[0, 0, -0.01]}>
-                <planeGeometry args={[8, 0.3]} />
-                <meshBasicMaterial color="#1a1a2e" opacity={0.8} transparent />
-              </mesh>
-
-              {/* Segment Bitcoin */}
-              <mesh position={[-4 + (dominanceData.bitcoin.percentage / 100 * 8) / 2, 0, 0]}>
-                <planeGeometry args={[(dominanceData.bitcoin.percentage / 100) * 8, 0.3]} />
-                <meshBasicMaterial color={dominanceData.bitcoin.color} />
-              </mesh>
-
-              {/* Segment Ethereum */}
-              <mesh position={[-4 + (dominanceData.bitcoin.percentage / 100 * 8) + (dominanceData.ethereum.percentage / 100 * 8) / 2, 0, 0]}>
-                <planeGeometry args={[(dominanceData.ethereum.percentage / 100) * 8, 0.3]} />
-                <meshBasicMaterial color={dominanceData.ethereum.color} />
-              </mesh>
-
-              {/* Segment Autres */}
-              <mesh position={[-4 + (dominanceData.bitcoin.percentage / 100 * 8) + (dominanceData.ethereum.percentage / 100 * 8) + (dominanceData.others.percentage / 100 * 8) / 2, 0, 0]}>
-                <planeGeometry args={[(dominanceData.others.percentage / 100) * 8, 0.3]} />
-                <meshBasicMaterial color={dominanceData.others.color} />
-              </mesh>
-            </group>
-
-            {/* Informations supplémentaires */}
-            <Text 
-              position={[0, -2.8, 0]}
-              fontSize={0.5} 
-              color="#6699cc"
-              anchorX="center"
-              anchorY="middle"
-            >
-              Total Market Cap: $2.8T
-            </Text>
-          </RenderTexture>
-        </meshBasicMaterial>
+        />
       </mesh>
+
+      {/* Interface HTML/CSS */}
+      <Html
+        transform
+        position={[0, 0, 0]}
+        distanceFactor={0.13}
+        style={{
+          width: '500px',
+          height: '300px',
+          pointerEvents: 'auto',
+        }}
+      >
+        <div
+          className="dominance-container"
+          onClick={(e) => {
+            e.stopPropagation();
+            onScreenClick && onScreenClick();
+          }}
+        >
+          <h1 className="dominance-title">Dominance Bitcoin</h1>
+
+          {/* Légendes */}
+          <div className="dominance-legend">
+            <div className="legend-item">
+              <div 
+                className="legend-dot" 
+                style={{ backgroundColor: dominanceData.bitcoin.color }}
+              />
+              <span className="legend-label">Bitcoin</span>
+            </div>
+            <div className="legend-item">
+              <div 
+                className="legend-dot" 
+                style={{ backgroundColor: dominanceData.ethereum.color }}
+              />
+              <span className="legend-label">Ethereum</span>
+            </div>
+            <div className="legend-item">
+              <div 
+                className="legend-dot" 
+                style={{ backgroundColor: dominanceData.others.color }}
+              />
+              <span className="legend-label">Autres</span>
+            </div>
+          </div>
+
+          {/* Données */}
+          <div className="dominance-data">
+            <div className="data-item">
+              <div className="data-percentage">{dominanceData.bitcoin.percentage.toFixed(1)}%</div>
+              <div 
+                className="data-change" 
+                style={{ color: getChangeColor(dominanceData.bitcoin.change) }}
+              >
+                {dominanceData.bitcoin.change}
+              </div>
+            </div>
+            <div className="data-item">
+              <div className="data-percentage">{dominanceData.ethereum.percentage.toFixed(1)}%</div>
+              <div 
+                className="data-change" 
+                style={{ color: getChangeColor(dominanceData.ethereum.change) }}
+              >
+                {dominanceData.ethereum.change}
+              </div>
+            </div>
+            <div className="data-item">
+              <div className="data-percentage">{dominanceData.others.percentage.toFixed(1)}%</div>
+              <div 
+                className="data-change" 
+                style={{ color: getChangeColor(dominanceData.others.change) }}
+              >
+                {dominanceData.others.change}
+              </div>
+            </div>
+          </div>
+
+          {/* Barre de progression */}
+          <div className="dominance-bar">
+            <div 
+              className="bar-segment bitcoin-segment"
+              style={{ 
+                width: `${dominanceData.bitcoin.percentage}%`,
+                backgroundColor: dominanceData.bitcoin.color
+              }}
+            />
+            <div 
+              className="bar-segment ethereum-segment"
+              style={{ 
+                width: `${dominanceData.ethereum.percentage}%`,
+                backgroundColor: dominanceData.ethereum.color
+              }}
+            />
+            <div 
+              className="bar-segment others-segment"
+              style={{ 
+                width: `${dominanceData.others.percentage}%`,
+                backgroundColor: dominanceData.others.color
+              }}
+            />
+          </div>
+
+          {/* Info supplémentaire */}
+          <div className="dominance-info">
+            Total Market Cap: $2.8T
+          </div>
+        </div>
+      </Html>
     </group>
   );
 };

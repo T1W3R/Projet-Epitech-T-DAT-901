@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { Stars as DreiStars, OrbitControls } from "@react-three/drei";
+import { Stars as DreiStars, OrbitControls, Stats } from "@react-three/drei";
 import Planet from "./3dObjects/Planet";
 import Spaceship from "./3dObjects/Spaceship";
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
@@ -404,6 +404,9 @@ const SpaceScene = () => {
   return (
     <>
       <Canvas camera={{ position: [0, 0, 8], fov: 60, near: 0.01, far: 500 }}>
+        {/* Affichage des FPS et statistiques de performance */}
+        <Stats />
+        
         {/* Contrôleur d'animation de caméra (indépendant de la scène) */}
         <CameraController zoomTarget={zoomTarget} />
         

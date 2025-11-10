@@ -1,7 +1,8 @@
-import { RenderTexture, Text, PerspectiveCamera } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
+import "./BuyCryptoScreen.css";
 
 const BuyCryptoScreen = ({ 
   selectedPlanet, 
@@ -45,36 +46,12 @@ const BuyCryptoScreen = ({
 
     // Oscillations synchronisées avec le vaisseau
     if (groupRef.current && useMotions) {
-    //   // Même oscillation de rotation sur l'axe Z que le vaisseau et l'axe X
-    //   groupRef.current.rotation.z -= Math.sin(time * 1) * 0.0005;
-    //   groupRef.current.position.x -= Math.sin(time * 1) * 0.0002;
-
-    //   // Même oscillation de position sur l'axe Y que le vaisseau
-    //   groupRef.current.position.y = basePosition[1] + Math.sin(time * 1) * 0.05;
+      // Oscillations optionnelles
     }
   });
 
   return (
     <group ref={groupRef} position={basePosition} quaternion={quaternion}>
-      {/* Zone cliquable invisible pour toute l'interface */}
-      <mesh 
-        position={[0, 0, 0.01]}
-        onClick={(e) => {
-          e.stopPropagation();
-          onBuyCryptoScreenClick && onBuyCryptoScreenClick();
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          document.body.style.cursor = 'pointer';
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = 'default';
-        }}
-      >
-        <planeGeometry args={[0.5, 0.25]} />
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
-
       {/* Cadre holographique lumineux */}
       <mesh 
         ref={frameRef}
@@ -91,7 +68,7 @@ const BuyCryptoScreen = ({
         />
       </mesh>
 
-      {/* Écran holographique principal */}
+      {/* Écran avec fond */}
       <mesh 
         ref={meshRef}
         position={[0, 0, -0.008]} 
@@ -100,87 +77,65 @@ const BuyCryptoScreen = ({
       >
         <planeGeometry args={[2.5, 1.5]} />
         <meshBasicMaterial
+          color="#000a1a"
           transparent
           opacity={0.85}
           side={THREE.DoubleSide}
-        >
-          <RenderTexture attach="map" anisotropy={16}>
-            <PerspectiveCamera makeDefault position={[0, 0, 10]} />
-            <color attach="background" args={["#000a1a"]} />
-            <ambientLight intensity={0.8} />
-            {selectedPlanet ? (
-              <>
-                <Text 
-                  position={[0, 2.5, 0]}
-                  fontSize={1.75} 
-                  color="#00ffff"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  {selectedPlanet}
-                </Text>
-                <Text 
-                  position={[0, 0, 0]}
-                  fontSize={0.75} 
-                  color="#00ff88"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  Prix: $45,123.89
-                </Text>
-                <Text 
-                  position={[0, -1, 0]}
-                  fontSize={0.75} 
-                  color="#00ff00"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  Achetez
-                </Text>
-                <Text 
-                  position={[0, -2, 0]}
-                  fontSize={0.75} 
-                  color="#ff0000"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  Vendre
-                </Text>
-              </>
-            ) : (
-              <>
-                <Text 
-                  position={[0, 0.9, 0]}
-                  fontSize={0.75} 
-                  color="#666699"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  [ SYSTÈME SPATIAL ]
-                </Text>
-                <Text 
-                  position={[0, 0.0, 0]}
-                  fontSize={0.75} 
-                  color="#4488aa"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  Sélectionnez une planète
-                </Text>
-                <Text 
-                  position={[0, -0.75, 0]}
-                  fontSize={0.55} 
-                  color="#335577"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  pour afficher des données supplémentaires
-                </Text>
-              </>
-            )}
-          </RenderTexture>
-        </meshBasicMaterial>
+        />
       </mesh>
+
+      {/* Interface HTML/CSS */}
+      <Html
+        transform
+        position={[0, 0, 0]}
+        distanceFactor={0.13}
+        style={{
+          width: '500px',
+          height: '300px',
+          pointerEvents: 'auto',
+        }}
+      >
+        <div
+          className="buy-crypto-container"
+          onClick={(e) => {
+            e.stopPropagation();
+            onBuyCryptoScreenClick && onBuyCryptoScreenClick();
+          }}
+        >
+          {selectedPlanet ? (
+            <>
+              <h1 className="buy-crypto-title">
+                {selectedPlanet}
+              </h1>
+              
+              <div className="buy-crypto-price">
+                Prix: $45,123.89
+              </div>
+
+              <div className="buy-crypto-actions">
+                <button className="buy-button">
+                  Achetez
+                </button>
+                <button className="sell-button">
+                  Vendre
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="buy-crypto-empty-state">
+              <div className="buy-crypto-empty-title">
+                [ SYSTÈME SPATIAL ]
+              </div>
+              <div className="buy-crypto-empty-subtitle">
+                Sélectionnez une planète
+              </div>
+              <div className="buy-crypto-empty-text">
+                pour afficher des données supplémentaires
+              </div>
+            </div>
+          )}
+        </div>
+      </Html>
     </group>
   );
 };

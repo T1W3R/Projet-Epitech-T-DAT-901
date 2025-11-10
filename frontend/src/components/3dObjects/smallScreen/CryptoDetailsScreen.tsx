@@ -107,7 +107,6 @@ const CryptoDetailsScreen = ({
       {/* Interface HTML/CSS */}
       <Html
         transform
-        occlude
         position={[0, 0, 0]}
         distanceFactor={0.13}
         style={{
