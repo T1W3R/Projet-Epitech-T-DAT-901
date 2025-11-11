@@ -47,7 +47,6 @@ const ShipWithSpotlight = () => {
         color={"#00ffff"}
         castShadow
       />
-      {/* Cible visible pour debug */}
       <mesh ref={targetRef as unknown as React.RefObject<THREE.Mesh>}>
         <sphereGeometry args={[0.05, 8, 8]} />
         <meshBasicMaterial color="#ff00ff" />
@@ -55,8 +54,6 @@ const ShipWithSpotlight = () => {
     </>
   );
 };
-
-// Composant pour gérer l'animation de la caméra (désactivé)
 
 const CameraController = memo(({ 
   zoomTarget,
@@ -145,6 +142,16 @@ const CameraController = memo(({
 
   const { CHART_POSITION, CHART_LOOK_AT, BUY_CRYPTO_POSITION, BUY_CRYPTO_LOOK_AT, ALTCOIN_METRICS_POSITION, ALTCOIN_METRICS_LOOK_AT, CRYPTO_DETAILS_POSITION, CRYPTO_DETAILS_LOOK_AT, BTC_DOMINANCE_POSITION, BTC_DOMINANCE_LOOK_AT, MAIN_POSITION, MAIN_LOOK_AT } = positionsRef.current;
 
+  // Mapping des targets vers leurs positions et lookAt
+  const targetMapping = useMemo(() => ({
+    none: { position: MAIN_POSITION, lookAt: MAIN_LOOK_AT },
+    chart: { position: CHART_POSITION, lookAt: CHART_LOOK_AT },
+    buyCrypto: { position: BUY_CRYPTO_POSITION, lookAt: BUY_CRYPTO_LOOK_AT },
+    altcoinMetrics: { position: ALTCOIN_METRICS_POSITION, lookAt: ALTCOIN_METRICS_LOOK_AT },
+    cryptoDetails: { position: CRYPTO_DETAILS_POSITION, lookAt: CRYPTO_DETAILS_LOOK_AT },
+    btcDominance: { position: BTC_DOMINANCE_POSITION, lookAt: BTC_DOMINANCE_LOOK_AT }
+  }), [MAIN_POSITION, MAIN_LOOK_AT, CHART_POSITION, CHART_LOOK_AT, BUY_CRYPTO_POSITION, BUY_CRYPTO_LOOK_AT, ALTCOIN_METRICS_POSITION, ALTCOIN_METRICS_LOOK_AT, CRYPTO_DETAILS_POSITION, CRYPTO_DETAILS_LOOK_AT, BTC_DOMINANCE_POSITION, BTC_DOMINANCE_LOOK_AT]);
+
   useFrame((_, delta) => {
     const anim = animationRef.current;
     
@@ -154,112 +161,26 @@ const CameraController = memo(({
       anim.startPos.copy(camera.position);
       anim.progress = 0;
       
-      // Définir la destination selon la nouvelle target
-      switch (zoomTarget) {
-        case 'chart':
-          anim.targetPos.copy(CHART_POSITION);
-          anim.targetLookAt.copy(CHART_LOOK_AT);
-          if (anim.currentTarget === 'buyCrypto') {
-            anim.startLookAt.copy(BUY_CRYPTO_LOOK_AT);
-          } else if (anim.currentTarget === 'altcoinMetrics') {
-            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
-          } else if (anim.currentTarget === 'cryptoDetails') {
-            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
-          } else if (anim.currentTarget === 'btcDominance') {
-            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
-          } else {
-            anim.startLookAt.copy(MAIN_LOOK_AT);
-          }
-          break;
-        case 'buyCrypto':
-          anim.targetPos.copy(BUY_CRYPTO_POSITION);
-          anim.targetLookAt.copy(BUY_CRYPTO_LOOK_AT);
-          if (anim.currentTarget === 'chart') {
-            anim.startLookAt.copy(CHART_LOOK_AT);
-          } else if (anim.currentTarget === 'altcoinMetrics') {
-            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
-          } else if (anim.currentTarget === 'cryptoDetails') {
-            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
-          } else if (anim.currentTarget === 'btcDominance') {
-            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
-          } else {
-            anim.startLookAt.copy(MAIN_LOOK_AT);
-          }
-          break;
-        case 'altcoinMetrics':
-          anim.targetPos.copy(ALTCOIN_METRICS_POSITION);
-          anim.targetLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
-          if (anim.currentTarget === 'chart') {
-            anim.startLookAt.copy(CHART_LOOK_AT);
-          } else if (anim.currentTarget === 'buyCrypto') {
-            anim.startLookAt.copy(BUY_CRYPTO_LOOK_AT);
-          } else if (anim.currentTarget === 'cryptoDetails') {
-            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
-          } else if (anim.currentTarget === 'btcDominance') {
-            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
-          } else {
-            anim.startLookAt.copy(MAIN_LOOK_AT);
-          }
-          break;
-        case 'cryptoDetails':
-          anim.targetPos.copy(CRYPTO_DETAILS_POSITION);
-          anim.targetLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
-          if (anim.currentTarget === 'chart') {
-            anim.startLookAt.copy(CHART_LOOK_AT);
-          } else if (anim.currentTarget === 'buyCrypto') {
-            anim.startLookAt.copy(BUY_CRYPTO_LOOK_AT);
-          } else if (anim.currentTarget === 'altcoinMetrics') {
-            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
-          } else if (anim.currentTarget === 'btcDominance') {
-            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
-          } else {
-            anim.startLookAt.copy(MAIN_LOOK_AT);
-          }
-          break;
-        case 'btcDominance':
-          anim.targetPos.copy(BTC_DOMINANCE_POSITION);
-          anim.targetLookAt.copy(BTC_DOMINANCE_LOOK_AT);
-          if (anim.currentTarget === 'chart') {
-            anim.startLookAt.copy(CHART_LOOK_AT);
-          } else if (anim.currentTarget === 'buyCrypto') {
-            anim.startLookAt.copy(BUY_CRYPTO_LOOK_AT);
-          } else if (anim.currentTarget === 'altcoinMetrics') {
-            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
-          } else if (anim.currentTarget === 'cryptoDetails') {
-            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
-          } else {
-            anim.startLookAt.copy(MAIN_LOOK_AT);
-          }
-          break;
-        case 'none':
-          anim.targetPos.copy(MAIN_POSITION);
-          anim.targetLookAt.copy(MAIN_LOOK_AT);
-          if (anim.currentTarget === 'chart') {
-            anim.startLookAt.copy(CHART_LOOK_AT);
-          } else if (anim.currentTarget === 'buyCrypto') {
-            anim.startLookAt.copy(BUY_CRYPTO_LOOK_AT);
-          } else if (anim.currentTarget === 'altcoinMetrics') {
-            anim.startLookAt.copy(ALTCOIN_METRICS_LOOK_AT);
-          } else if (anim.currentTarget === 'cryptoDetails') {
-            anim.startLookAt.copy(CRYPTO_DETAILS_LOOK_AT);
-          } else if (anim.currentTarget === 'btcDominance') {
-            anim.startLookAt.copy(BTC_DOMINANCE_LOOK_AT);
-          } else {
-            anim.startLookAt.copy(MAIN_LOOK_AT);
-          }
-          break;
-      }
+      // Récupérer les positions source et destination depuis le mapping
+      const targetConfig = targetMapping[zoomTarget];
+      const currentConfig = targetMapping[anim.currentTarget];
+      
+      // Définir la destination
+      anim.targetPos.copy(targetConfig.position);
+      anim.targetLookAt.copy(targetConfig.lookAt);
+      
+      // Définir le point de départ du lookAt
+      anim.startLookAt.copy(currentConfig.lookAt);
       
       anim.currentTarget = zoomTarget;
     }
 
     if (anim.isAnimating) {
-      anim.progress += delta * 2; // Vitesse d'animation
+      anim.progress += delta * 2;
       
       if (anim.progress >= 1) {
         anim.progress = 1;
         anim.isAnimating = false;
-        console.log("✅ Animation terminée, zoomTarget:", zoomTarget);
         onZoomComplete && onZoomComplete();
       }
       
@@ -292,15 +213,15 @@ const Scene3D = memo(({
   // Génération de planètes à différentes profondeurs (stable)
   const planets = useMemo(
     () => [
-      { name: "Bitcoin",    position: [-6,  2, -5]  as [number, number, number], textureUrl: "" }, //BTC
-      { name: "Ethereum",   position: [ 5,  1, -8]  as [number, number, number], textureUrl: "" }, //ETH
-      { name: "XRP",        position: [ -3, 7, -12] as [number, number, number], textureUrl: "" }, //XRP
-      { name: "Solana",     position: [ 2,  5, -16] as [number, number, number], textureUrl: "" }, //SOL
-      { name: "Cardano",    position: [-5,  0, -20] as [number, number, number], textureUrl: "" }, //ADA
-      { name: "Chainlink",  position: [ 6,  3, -24] as [number, number, number], textureUrl: "" }, //LINK
-      { name: "Avalanche",  position: [-4,  5, -28] as [number, number, number], textureUrl: "" }, //AVAX
-      { name: "Decentraland",position: [ 3, 3, -32] as [number, number, number], textureUrl: "" }, //MANA
-      { name: "Polygone",   position: [ -11, 3, -36] as [number, number, number], textureUrl: "" }, //POLY
+      { name: "Bitcoin",    position: [-6,  2, -5]  as [number, number, number] },    //BTC
+      { name: "Ethereum",   position: [ 5,  1, -8]  as [number, number, number] },    //ETH
+      { name: "XRP",        position: [ -3, 7, -12] as [number, number, number] },    //XRP
+      { name: "Solana",     position: [ 2,  5, -16] as [number, number, number] },    //SOL
+      { name: "Cardano",    position: [-5,  0, -20] as [number, number, number] },    //ADA
+      { name: "Chainlink",  position: [ 6,  3, -24] as [number, number, number] },    //LINK
+      { name: "Decentraland",position: [-4,  5.5, -28] as [number, number, number] }, //MANA
+      { name: "Avalanche",  position: [ 2, 2.5, -32] as [number, number, number] },   //AVAX
+      { name: "Polygone",   position: [ -11, 3.5, -36] as [number, number, number] }, //POLY
     ],
     []
   );
@@ -321,7 +242,6 @@ const Scene3D = memo(({
           key={`${p.name}-${idx}`}
           name={p.name}
           position={p.position}
-          textureUrl={p.textureUrl}
           onClick={onPlanetClick}
         />
       ))}
