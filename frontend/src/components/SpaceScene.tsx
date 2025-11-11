@@ -15,7 +15,7 @@ import BitcoinDominanceScreen from "./3dObjects/smallScreen/BitcoinDominanceScre
 import EditableObject from "../utils/EditableObject";
 
 
-const ShipWithSpotlight = ({ useMotion = true }: { useMotion?: boolean }) => {
+const ShipWithSpotlight = () => {
   const shipPos: [number, number, number] = [0.025, 0.2, 9];
 
   const spotRef = useRef<THREE.SpotLight>(null);
@@ -35,7 +35,6 @@ const ShipWithSpotlight = ({ useMotion = true }: { useMotion?: boolean }) => {
         position={shipPos}
         rotation={[0, 135.1, 0]}
         scale={0.01}
-        useMotions={useMotion}
       />
       {/* SpotLight dans le vaisseau visant les écrans holographiques */}
       <spotLight
@@ -284,11 +283,9 @@ const CameraController = memo(({
 const Scene3D = memo(({ 
   onPlanetClick, 
   debug = false,
-  useMotion = true
 }: { 
   onPlanetClick: (name: string) => void;
   debug?: boolean;
-  useMotion?: boolean;
 }) => {
   const controlsRef = useRef<typeof OrbitControls>(null);
 
@@ -311,13 +308,13 @@ const Scene3D = memo(({
   return (
     <>      
       <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 8, 5]} intensity={1.5} />
+      <directionalLight position={[5, 8, 5]} intensity={2} />
 
       {/* Fond étoilé via drei */}
       <DreiStars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
 
       {/* Vaisseau + spotLight avec helpers */}
-      <ShipWithSpotlight useMotion={useMotion} />
+      <ShipWithSpotlight />
 
       {planets.map((p, idx) => (
         <Planet
@@ -408,7 +405,6 @@ const SpaceScene = () => {
         <Scene3D 
           onPlanetClick={handlePlanetClick} 
           debug={false}
-          useMotion={false}
         />
 
         <EditableObject 
