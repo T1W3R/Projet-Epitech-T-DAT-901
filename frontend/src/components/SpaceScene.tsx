@@ -292,15 +292,15 @@ const Scene3D = memo(({
   // Génération de planètes à différentes profondeurs (stable)
   const planets = useMemo(
     () => [
-      { name: "Bitcoin",    position: [-6,  2, -5]  as [number, number, number], textureUrl: "" },
-      { name: "Ethereum",   position: [ 5,  1, -8]  as [number, number, number], textureUrl: "" },
-      { name: "XRP",        position: [ -3, 7, -12] as [number, number, number], textureUrl: "" },
-      { name: "Solana",     position: [ 2,  5, -16] as [number, number, number], textureUrl: "" },
-      { name: "Cardano",    position: [-5,  0, -20] as [number, number, number], textureUrl: "" },
-      { name: "Chainlink",  position: [ 6,  3, -24] as [number, number, number], textureUrl: "" },
-      { name: "Avalanche",  position: [-4,  5, -28] as [number, number, number], textureUrl: "" },
-      { name: "Uniswap",    position: [ 3, 3, -32] as [number, number, number], textureUrl: "" },
-      { name: "NEAR",       position: [ -11, 3, -36] as [number, number, number], textureUrl: "" },
+      { name: "Bitcoin",    position: [-6,  2, -5]  as [number, number, number], textureUrl: "" }, //BTC
+      { name: "Ethereum",   position: [ 5,  1, -8]  as [number, number, number], textureUrl: "" }, //ETH
+      { name: "XRP",        position: [ -3, 7, -12] as [number, number, number], textureUrl: "" }, //XRP
+      { name: "Solana",     position: [ 2,  5, -16] as [number, number, number], textureUrl: "" }, //SOL
+      { name: "Cardano",    position: [-5,  0, -20] as [number, number, number], textureUrl: "" }, //ADA
+      { name: "Chainlink",  position: [ 6,  3, -24] as [number, number, number], textureUrl: "" }, //LINK
+      { name: "Avalanche",  position: [-4,  5, -28] as [number, number, number], textureUrl: "" }, //AVAX
+      { name: "Decentraland",position: [ 3, 3, -32] as [number, number, number], textureUrl: "" }, //MANA
+      { name: "Polygone",   position: [ -11, 3, -36] as [number, number, number], textureUrl: "" }, //POLY
     ],
     []
   );
