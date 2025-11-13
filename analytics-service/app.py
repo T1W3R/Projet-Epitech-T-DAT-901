@@ -55,18 +55,24 @@ def get_price(symbol):
         return jsonify({"error": "Crypto not found"}), 404
     
 @app.route("/history/<period>/<symbol>")
-def history(symbol, period):
-    """Historique de prix sur 1 jour / 30 jours / 365 jours"""
+def history(period, symbol):
+    """Historique de prix d'une crypto (jour / mois / année)"""
+
+    # 1️⃣ Mapping symbol → id CoinGecko
     id_map = {
         "BTC": "bitcoin",
         "ETH": "ethereum",
-        "BNB": "binancecoin",
+        "XRP": "ripple",
         "SOL": "solana",
-        "ADA": "cardano"
+        "ADA": "cardano",
+        "LINK": "chainlink",
+        "MANA": "decentraland",
+        "AVAX": "avax",
+        "POLYGON": "polygon"
     }
     coin_id = id_map.get(symbol.upper(), symbol.lower())
 
-    # On adapte les périodes
+    # 2️⃣ Mapping période → jours
     days_map = {
         "day": 1,
         "month": 30,
@@ -74,23 +80,50 @@ def history(symbol, period):
     }
     days = days_map.get(period, 1)
 
+    # 3️⃣ Construire la requête CoinGecko
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
     params = {"vs_currency": "eur", "days": days}
     headers = {"x-cg-demo-api-key": API_KEY}
 
     try:
-        response = requests.get(url, params=params, headers=headers).json()
-        prices = [
+        response = requests.get(url, params=params, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+
+        prices = data.get("prices", [])
+        if not prices:
+            return jsonify({"error": "Aucune donnée disponible"}), 404
+
+        # 4️⃣ Échantillonnage selon la période (réduit le nombre de points)
+        total = len(prices)
+        if period == "day":
+            step = max(1, total // 12)     # environ 12 points -> toutes les 2h
+        elif period == "month":
+            step = max(1, total // 30)     # environ 1 point par jour
+        else:  # year
+            step = max(1, total // 12)     # environ 1 point par mois
+
+        sampled = prices[::step]
+
+        # 5️⃣ Formatage pour le front-end
+        points = [
             {
                 "time": datetime.utcfromtimestamp(p[0] / 1000).isoformat(),
                 "price": p[1]
             }
-            for p in response["prices"]
+            for p in sampled
         ]
-        return jsonify({"symbol": symbol.upper(), "period": period, "points": prices})
+
+        return jsonify({
+            "symbol": symbol.upper(),
+            "period": period,
+            "points": points
+        })
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"Erreur de requête CoinGecko: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 
 if __name__ == "__main__":
