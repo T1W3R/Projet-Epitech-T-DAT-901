@@ -7,7 +7,7 @@ type Point = {
   price: number;
 };
 
-const COINS = ["BTC", "ETH", "BNB", "SOL", "ADA"];
+const COINS = ["BTC", "ETH", "SOL", "ADA", "XRP", "LINK", "MANA", "AVAX", "POLYGON"];
 const PERIODS: ("day" | "month" | "year")[] = ["day", "month", "year"];
 
 function App() {
@@ -64,7 +64,7 @@ const fetchPrice = async () => {
     }),
     datasets: [
       {
-        label: `${coin} (USD)`,
+        label: `${coin} (EUR)`,
         data: history.map((d) => d.price),
         borderColor: "rgb(75, 192, 192)",
         backgroundColor: "rgba(75, 192, 192, 0.2)",
@@ -78,7 +78,7 @@ const fetchPrice = async () => {
     <div style={{ padding: "20px" }}>
       <h1>
         {coin} — Prix actuel :{" "}
-        {price ? price.toFixed(2) : "..."} $
+        {price ? price.toFixed(2) : "..."} €
       </h1>
 
       <div style={{ marginBottom: "20px" }}>
