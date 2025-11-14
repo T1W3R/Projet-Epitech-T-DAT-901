@@ -357,7 +357,8 @@ const SpaceScene = () => {
           onRotationChange={(rot) => setScreenRotations(prev => ({ ...prev, buyCrypto: rot }))}
         >
           <BuyCryptoScreen 
-            selectedPlanet={selectedPlanet} 
+            selectedPlanet={selectedPlanet}
+            selectedApiId={selectedApiId}
             onBuyCryptoScreenClick={handleBuyCryptoScreenClick}
             position={[0, 0, 0]}
             quaternion={createScreenQuaternion(-29.9, -59.5)}
@@ -391,6 +392,7 @@ const SpaceScene = () => {
         >
           <CryptoDetailsScreen 
             selectedPlanet={selectedPlanet}
+            selectedApiId={selectedApiId}
             onScreenClick={handleCryptoDetailsScreenClick}
             position={[0, 0, 0]}
             quaternion={createScreenQuaternion(-29.9, 59.9)}

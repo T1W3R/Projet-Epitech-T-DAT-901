@@ -177,3 +177,25 @@
   text-shadow: 0 0 6px rgba(113, 128, 150, 0.5);
 }
 
+/* État de chargement */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  font-size: 28px;
+  color: #00ffff;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+  }
+}
+

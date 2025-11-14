@@ -91,7 +91,8 @@ const ChartScreen = ({
     }
   });
 
-  // Configuration des données du graphique
+  const currentPrice = history.length > 0 ? history[history.length - 1].price : null;
+
   const chartData = {
     labels: history.map((d) => {
       const dt = new Date(d.time);
@@ -101,12 +102,18 @@ const ChartScreen = ({
     }),
     datasets: [
       {
-        label: `${selectedPlanet || 'Crypto'} (USD)`,
+        label: `${selectedPlanet || 'Crypto'} (Euro)`,
         data: history.map((d) => d.price),
         borderColor: "rgb(75, 192, 192)",
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         fill: true,
         tension: 0.2,
+        pointRadius: 4,
+        pointHoverRadius: 10,
+        pointHitRadius: 30,
+        pointBackgroundColor: "rgb(75, 192, 192)",
+        pointBorderColor: "#00ffff",
+        pointBorderWidth: 2,
       },
     ],
   };
@@ -115,6 +122,11 @@ const ChartScreen = ({
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'nearest' as const,
+      axis: 'x' as const,
+      intersect: false,
+    },
     plugins: {
       legend: {
         display: true,
@@ -122,7 +134,7 @@ const ChartScreen = ({
           color: "#00ffff",
           font: {
             family: "'Orbitron', monospace",
-            size: 18,
+            size: 20,
           },
         },
       },
@@ -132,6 +144,16 @@ const ChartScreen = ({
         bodyColor: "#ffffff",
         borderColor: "#00ffff",
         borderWidth: 1,
+        titleFont: {
+          size: 20,
+          family: "'Orbitron', monospace",
+          weight: 'bold' as const,
+        },
+        bodyFont: {
+          size: 24,
+          family: "'Orbitron', monospace",
+        },
+        padding: 12,
       },
     },
     scales: {
@@ -219,7 +241,19 @@ const ChartScreen = ({
           {selectedPlanet ? (
             <div className="chart-content">
               <div className="chart-header">
-                <h2 className="chart-title">{selectedPlanet}</h2>
+                <div className="chart-title-wrapper">
+                  <h2 className="chart-title">{selectedPlanet}</h2>
+                  {currentPrice !== null && (
+                    <span className="chart-current-price">
+                      {currentPrice.toLocaleString('fr-FR', {
+                        style: 'currency',
+                        currency: 'EUR',
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 3,
+                      })}
+                    </span>
+                  )}
+                </div>
                 <div className="chart-period-selector">
                   <button 
                     className={`period-btn ${period === 'day' ? 'active' : ''}`}

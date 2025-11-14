@@ -43,6 +43,12 @@
   border-bottom: 1px solid rgba(0, 255, 255, 0.2);
 }
 
+.chart-title-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
 .chart-title {
   font-size: 72px;
   font-weight: 700;
@@ -50,6 +56,23 @@
   color: #ffffff;
   letter-spacing: 1px;
   text-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+.chart-current-price {
+  font-size: 52px;
+  font-weight: 600;
+  color: #00ffff;
+  text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  animation: priceGlow 2s ease-in-out infinite;
+}
+
+@keyframes priceGlow {
+  0%, 100% {
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+  }
 }
 
 .chart-subtitle {
