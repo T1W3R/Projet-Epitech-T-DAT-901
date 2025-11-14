@@ -75,7 +75,7 @@ const CameraController = memo(({
 
   // Positions fixes pour éviter les problèmes de mutation (une seule fois)
   const positionsRef = useRef({
-    CHART_POSITION: new THREE.Vector3(-0.01, -0.21, 6.8),
+    CHART_POSITION: new THREE.Vector3(-0.01, -0.21, 6.6),
     CHART_LOOK_AT: new THREE.Vector3(-0.01, -0.21, 6.24),
     BUY_CRYPTO_POSITION: new THREE.Vector3(),
     BUY_CRYPTO_LOOK_AT: new THREE.Vector3(0.424, -0.278, 6.475),
@@ -205,7 +205,7 @@ const Scene3D = memo(({
   onPlanetClick, 
   debug = false,
 }: { 
-  onPlanetClick: (name: string) => void;
+  onPlanetClick: (name: string, apiId: string) => void;
   debug?: boolean;
 }) => {
   const controlsRef = useRef<typeof OrbitControls>(null);
@@ -213,15 +213,15 @@ const Scene3D = memo(({
   // Génération de planètes à différentes profondeurs (stable)
   const planets = useMemo(
     () => [
-      { name: "Bitcoin",    position: [-6,  2, -5]  as [number, number, number] },    //BTC
-      { name: "Ethereum",   position: [ 5,  1, -8]  as [number, number, number] },    //ETH
-      { name: "XRP",        position: [ -3, 7, -12] as [number, number, number] },    //XRP
-      { name: "Solana",     position: [ 2,  5, -16] as [number, number, number] },    //SOL
-      { name: "Cardano",    position: [-5,  0, -20] as [number, number, number] },    //ADA
-      { name: "Chainlink",  position: [ 6,  3, -24] as [number, number, number] },    //LINK
-      { name: "Decentraland",position: [-4,  5.5, -28] as [number, number, number] }, //MANA
-      { name: "Avalanche",  position: [ 2, 2.5, -32] as [number, number, number] },   //AVAX
-      { name: "Polygone",   position: [ -11, 3.5, -36] as [number, number, number] }, //POLY
+      { name: "Bitcoin",      apiId: "bitcoin",                 position: [-6,  2, -5]  as [number, number, number] },    //BTC
+      { name: "Ethereum",     apiId: "ethereum",                position: [ 5,  1, -8]  as [number, number, number] },    //ETH
+      { name: "XRP",          apiId: "ripple",                  position: [ -3, 7, -12] as [number, number, number] },    //XRP
+      { name: "Solana",       apiId: "solana",                  position: [ 2,  5, -16] as [number, number, number] },    //SOL
+      { name: "Cardano",      apiId: "cardano",                 position: [-5,  0, -20] as [number, number, number] },    //ADA
+      { name: "Chainlink",    apiId: "chainlink",               position: [ 6,  3, -24] as [number, number, number] },    //LINK
+      { name: "Decentraland", apiId: "decentraland",            position: [-4,  5.5, -28] as [number, number, number] }, //MANA
+      { name: "Avalanche",    apiId: "avalanche-2",             position: [ 2, 2.5, -32] as [number, number, number] },   //AVAX
+      { name: "Polygone",     apiId: "polygon-ecosystem-token", position: [ -11, 3.5, -36] as [number, number, number] }, //POLY
     ],
     []
   );
@@ -241,6 +241,7 @@ const Scene3D = memo(({
         <Planet
           key={`${p.name}-${idx}`}
           name={p.name}
+          apiId={p.apiId}
           position={p.position}
           onClick={onPlanetClick}
         />
@@ -264,6 +265,7 @@ const Scene3D = memo(({
 // Composant principal avec le state (seul le HUD se re-render)
 const SpaceScene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
+  const [selectedApiId, setSelectedApiId] = useState<string | null>(null);
   const [zoomTarget, setZoomTarget] = useState<'none' | 'chart' | 'buyCrypto' | 'altcoinMetrics' | 'cryptoDetails' | 'btcDominance'>('none');
   
   // États pour le mode édition des écrans
@@ -286,8 +288,9 @@ const SpaceScene = () => {
   });
   
   // Stabilise la fonction pour éviter les re-renders de Scene3D
-  const handlePlanetClick = useCallback((name: string) => {
+  const handlePlanetClick = useCallback((name: string, apiId: string) => {
     setSelectedPlanet(name);
+    setSelectedApiId(apiId);
   }, []);
 
   // Gestionnaire pour le clic sur l'écran holographique principal (stabilisé avec ref)
@@ -337,7 +340,8 @@ const SpaceScene = () => {
           onRotationChange={(rot) => setScreenRotations(prev => ({ ...prev, chart: rot }))}
         >
           <ChartScreen 
-            selectedPlanet={selectedPlanet} 
+            selectedPlanet={selectedPlanet}
+            selectedApiId={selectedApiId}
             onChartScreenClick={handleChartScreenClick}
             position={[0, 0, 0]} // Position relative dans le groupe parent
           />

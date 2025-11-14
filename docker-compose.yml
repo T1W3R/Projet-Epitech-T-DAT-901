@@ -65,8 +65,9 @@ services:
     depends_on:
       - analytics-service
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/vite.config.ts:/app/vite.config.ts
     command: ["npm", "run", "dev", "--", "--host"]
 
 volumes:
