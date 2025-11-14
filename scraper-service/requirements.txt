@@ -1,2 +1,5 @@
 flask
+flask-cors
 kafka-python
+duckdb
+requests
