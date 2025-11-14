@@ -1,16 +1,42 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from "chart.js";
 import "./ChartScreen.css";
 
+// Enregistrement des composants Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
 const ChartScreen = ({ 
-  selectedPlanet, 
+  selectedPlanet,
+  selectedApiId,
   onChartScreenClick,
   position = [0, 0, 0],
   quaternion = undefined,
 }: { 
   selectedPlanet: string | null;
+  selectedApiId: string | null;
   onChartScreenClick?: () => void;
   position?: [number, number, number];
   quaternion?: THREE.Quaternion | undefined;
@@ -19,10 +45,32 @@ const ChartScreen = ({
   const frameRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
 
+  // États pour la gestion des données du graphique
+  const [history, setHistory] = useState<Array<{ time: string; price: number }>>([]);
+  const [period, setPeriod] = useState<string>("day");
+
   const BASE_SCALE: [number, number, number] = [0.18, 0.15, 1];
   
   // Positions de base pour l'écran holographique
   const basePosition: [number, number, number] = position;
+
+  // 🔹 Récupération de l'historique selon la période
+  const fetchHistory = async () => {
+    if (!selectedApiId) return;
+    
+    try {
+      const res = await fetch(`http://localhost:5000/history/${period}/${selectedApiId}`);
+      const json = await res.json();
+      if (json.points) setHistory(json.points);
+    } catch (err) {
+      console.error("Erreur lors de la récupération de l'historique:", err);
+    }
+  };
+
+  // Récupération des données à chaque changement de planète ou de période
+  useEffect(() => {
+    fetchHistory();
+  }, [selectedApiId, period]);
 
   // Animation de scintillement holographique et oscillations
   useFrame((state) => {
@@ -42,6 +90,77 @@ const ChartScreen = ({
       }
     }
   });
+
+  // Configuration des données du graphique
+  const chartData = {
+    labels: history.map((d) => {
+      const dt = new Date(d.time);
+      return period === "day"
+        ? dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+        : dt.toLocaleDateString("fr-FR");
+    }),
+    datasets: [
+      {
+        label: `${selectedPlanet || 'Crypto'} (USD)`,
+        data: history.map((d) => d.price),
+        borderColor: "rgb(75, 192, 192)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        fill: true,
+        tension: 0.2,
+      },
+    ],
+  };
+
+  // Options du graphique
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        labels: {
+          color: "#00ffff",
+          font: {
+            family: "'Orbitron', monospace",
+            size: 18,
+          },
+        },
+      },
+      tooltip: {
+        backgroundColor: "rgba(0, 10, 26, 0.9)",
+        titleColor: "#00ffff",
+        bodyColor: "#ffffff",
+        borderColor: "#00ffff",
+        borderWidth: 1,
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: "#00ffff",
+          font: {
+            family: "'Orbitron', monospace",
+            size: 20,
+          },
+        },
+        grid: {
+          color: "rgba(0, 255, 255, 0.1)",
+        },
+      },
+      y: {
+        ticks: {
+          color: "#00ffff",
+          font: {
+            family: "'Orbitron', monospace",
+            size: 24,
+          },
+        },
+        grid: {
+          color: "rgba(0, 255, 255, 0.1)",
+        },
+      },
+    },
+  };
 
   return (
     <group ref={groupRef} position={basePosition} quaternion={quaternion}>
@@ -99,8 +218,45 @@ const ChartScreen = ({
         >
           {selectedPlanet ? (
             <div className="chart-content">
-              <h2 className="chart-title">{selectedPlanet}</h2>
-              <div className="chart-subtitle">Overview</div>
+              <div className="chart-header">
+                <h2 className="chart-title">{selectedPlanet}</h2>
+                <div className="chart-period-selector">
+                  <button 
+                    className={`period-btn ${period === 'day' ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPeriod('day');
+                    }}
+                  >
+                    24H
+                  </button>
+                  <button 
+                    className={`period-btn ${period === 'month' ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPeriod('month');
+                    }}
+                  >
+                    30J
+                  </button>
+                  <button 
+                    className={`period-btn ${period === 'year' ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPeriod('year');
+                    }}
+                  >
+                    1A
+                  </button>
+                </div>
+              </div>
+              <div className="chart-graph-container">
+                {history.length > 0 ? (
+                  <Line data={chartData} options={chartOptions} />
+                ) : (
+                  <div className="chart-loading">Chargement des données...</div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="chart-empty-state">

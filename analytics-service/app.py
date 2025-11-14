@@ -67,8 +67,8 @@ def history(period, symbol):
         "ADA": "cardano",
         "LINK": "chainlink",
         "MANA": "decentraland",
-        "AVAX": "avax",
-        "POLYGON": "polygon"
+        "AVAX": "avalanche-2",
+        "POLYGON": "polygon-ecosystem-token"
     }
     coin_id = id_map.get(symbol.upper(), symbol.lower())
 
@@ -97,9 +97,9 @@ def history(period, symbol):
         # 4️⃣ Échantillonnage selon la période (réduit le nombre de points)
         total = len(prices)
         if period == "day":
-            step = max(1, total // 12)     # environ 12 points -> toutes les 2h
+            step = max(1, total // 24)     # environ 12 points -> toutes les 2h
         elif period == "month":
-            step = max(1, total // 30)     # environ 1 point par jour
+            step = max(1, total // 15)     # environ 1 point par 15 jours
         else:  # year
             step = max(1, total // 12)     # environ 1 point par mois
 

@@ -5,7 +5,8 @@ import * as THREE from "three";
 
 type PlanetProps = ThreeElements["mesh"] & {
   name: string;
-  onClick?: (name: string) => void;
+  apiId?: string;
+  onClick?: (name: string, apiId: string) => void;
 };
 
 // Mapping des noms de crypto vers leurs modèles et textures
@@ -71,7 +72,7 @@ const CRYPTO_MODELS: Record<string, {
   }
 };
 
-const Planet = ({ name, onClick, position, rotation, ...props }: PlanetProps) => {
+const Planet = ({ name, apiId = name.toLowerCase(), onClick, position, rotation, ...props }: PlanetProps) => {
   const ref = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
@@ -149,7 +150,7 @@ const Planet = ({ name, onClick, position, rotation, ...props }: PlanetProps) =>
         scale={hovered ? 0.9 : 0.75}
         onClick={(e) => {
           e.stopPropagation();
-          onClick?.(name);
+          onClick?.(name, apiId);
         }}
         onPointerOver={(e) => {
           e.stopPropagation();
@@ -178,7 +179,7 @@ const Planet = ({ name, onClick, position, rotation, ...props }: PlanetProps) =>
       scale={hovered ? 1.2 : 1}
       onClick={(e) => {
         e.stopPropagation();
-        onClick?.(name);
+        onClick?.(name, apiId);
       }}
       onPointerOver={(e) => {
         e.stopPropagation();
