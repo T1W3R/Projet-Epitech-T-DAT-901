@@ -1,4 +1,6 @@
 flask
+flask-cors
 kafka-python
 duckdb
-flask-cors
+requests
+python-dotenv
