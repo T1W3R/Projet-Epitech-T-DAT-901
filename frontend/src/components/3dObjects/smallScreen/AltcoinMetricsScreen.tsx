@@ -23,8 +23,8 @@ const AltcoinMetricsScreen = ({
   const basePosition: [number, number, number] = position;
 
   //* Données simulées (à remplacer par des vraies données API plus tard)
-  const fearGreedIndex = 30; // 0-100
-  const altcoinSeasonIndex = 25; // 0-100
+  const fearGreedIndex = 15; // 0-100
+  const altcoinSeasonIndex = 26; // 0-100
 
   // Déterminer la couleur selon l'indice Fear & Greed
   const getFearGreedColor = (value: number) => {
