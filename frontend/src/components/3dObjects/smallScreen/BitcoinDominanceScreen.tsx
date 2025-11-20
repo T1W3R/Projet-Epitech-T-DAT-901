@@ -25,18 +25,18 @@ const BitcoinDominanceScreen = ({
   //* Données simulées pour la dominance (à remplacer par des vraies données API plus tard)
   const dominanceData = {
     bitcoin: {
-      percentage: 60,
-      change: "-0.23%",
+      percentage: 58.6,
+      change: "-0.42%",
       color: "#F7931A"
     },
     ethereum: {
-      percentage: 12.0,
-      change: "-0.27%",
+      percentage: 11.6,
+      change: "-1.15%",
       color: "#627EEA" 
     },
     others: {
-      percentage: 28.0,
-      change: "+0.51%",
+      percentage: 29.8,
+      change: "+1.57%",
       color: "#8A8A8A" 
     }
   };
