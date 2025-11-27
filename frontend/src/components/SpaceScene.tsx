@@ -13,6 +13,7 @@ import AltcoinMetricsScreen from "./3dObjects/smallScreen/AltcoinMetricsScreen";
 import CryptoDetailsScreen from "./3dObjects/smallScreen/CryptoDetailsScreen";
 import BitcoinDominanceScreen from "./3dObjects/smallScreen/BitcoinDominanceScreen";
 import EditableObject from "../utils/EditableObject";
+import PriceNotifications from "./PriceNotifications";
 
 
 const ShipWithSpotlight = () => {
@@ -498,6 +499,9 @@ rotation: [${rot.map(x => x.toFixed(3)).join(', ')}]`;
           </div>
         )}
       </div>
+
+      {/* Zone de notifications holographiques */}
+      <PriceNotifications />
     </>
   );
 };

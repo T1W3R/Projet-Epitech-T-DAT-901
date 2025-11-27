@@ -1,0 +1,104 @@
+/* Zone de notifications en haut à droite */
+.holo-notifications-zone {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 350px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Notification individuelle */
+.holo-notification {
+  background: rgba(0, 255, 255, 0.15);
+  border: 2px solid cyan;
+  border-radius: 8px;
+  padding: 12px 15px;
+  color: cyan;
+  font-family: monospace;
+  font-size: 13px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  pointer-events: auto;
+  animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s;
+  opacity: 1;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+.holo-notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.holo-notification-crypto {
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 0 0 10px cyan;
+  letter-spacing: 1px;
+}
+
+.holo-notification-time {
+  font-size: 10px;
+  color: rgba(0, 255, 255, 0.6);
+}
+
+.holo-notification-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.holo-notification-price {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.holo-notification-change {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.holo-notification-change.positive {
+  color: #00ff00;
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid #00ff00;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+}
+
+.holo-notification-change.negative {
+  color: #ff0000;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid #ff0000;
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+}
+
