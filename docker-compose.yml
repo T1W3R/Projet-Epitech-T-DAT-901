@@ -44,6 +44,16 @@ services:
     volumes:
       - ./scraper-service:/app
 
+  rss-service:
+    build: ./rss-service
+    depends_on:
+      - redpanda
+    environment:
+      - KAFKA_BROKER=redpanda:9092
+      - TOPIC=rss_articles
+    volumes:
+      - ./rss-service:/app
+
   analytics-service:
     build: ./analytics-service
     env_file:
