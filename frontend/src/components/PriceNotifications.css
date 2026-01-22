@@ -2,7 +2,7 @@
 .holo-notifications-zone {
   position: fixed;
   top: 20px;
-  left: 20px;
+  right: 20px;
   width: 500px;
   max-width: calc(100vw - 40px);
   z-index: 1000;
@@ -21,7 +21,7 @@
   backdrop-filter: blur(10px);
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
   pointer-events: auto;
-  animation: slideInLeft 0.5s ease-out;
+  animation: slideInRight 0.5s ease-out;
   opacity: 1;
   transition: all 0.3s ease;
 }
@@ -45,7 +45,7 @@
   transition: all 0.3s ease;
 }
 
-@keyframes slideInLeft {
+@keyframes slideInRight {
   from {
     transform: translateX(-100%);
     opacity: 0;
@@ -169,5 +169,63 @@
   font-size: 9px;
   color: rgba(0, 255, 255, 0.5);
   font-family: monospace;
+}
+
+/* Boutons de navigation */
+.rss-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 255, 255, 0.25);
+  border: 2px solid cyan;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  color: cyan;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+  padding: 0;
+  line-height: 1;
+  user-select: none;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.rss-nav-button:hover {
+  background: rgba(0, 255, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+  transform: translateY(-50%) scale(1.15);
+  border-color: #00ffff;
+}
+
+.rss-nav-button:active {
+  transform: translateY(-50%) scale(0.9);
+  background: rgba(0, 255, 255, 0.6);
+}
+
+.rss-nav-button:focus {
+  outline: none;
+  box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+}
+
+.rss-nav-prev {
+  left: -18px;
+}
+
+.rss-nav-next {
+  right: -18px;
+}
+
+/* S'assurer que les boutons ne sont pas masqués */
+.holo-notification.rss-article {
+  position: relative;
+  padding-left: 25px;
+  padding-right: 25px;
 }
 

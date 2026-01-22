@@ -242,6 +242,37 @@ def get_rss_articles_limit(limit):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/rss/debug")
+def rss_debug():
+    """Endpoint de debug pour vérifier l'état des articles RSS"""
+    try:
+        # Compter le nombre total d'articles
+        total_count = con.execute("SELECT COUNT(*) FROM rss_articles").fetchone()[0]
+        
+        # Derniers articles
+        recent_articles = con.execute(
+            "SELECT title, published, source FROM rss_articles ORDER BY ts DESC LIMIT 5"
+        ).fetchall()
+        
+        # Articles par source
+        articles_by_source = con.execute(
+            "SELECT source, COUNT(*) as count FROM rss_articles GROUP BY source"
+        ).fetchall()
+        
+        return jsonify({
+            "total_articles": total_count,
+            "recent_articles": [
+                {"title": row[0][:50] + "...", "published": str(row[1]), "source": row[2]}
+                for row in recent_articles
+            ],
+            "articles_by_source": [
+                {"source": row[0], "count": row[1]}
+                for row in articles_by_source
+            ]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

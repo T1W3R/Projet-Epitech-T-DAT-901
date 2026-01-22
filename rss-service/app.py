@@ -22,6 +22,34 @@ RSS_FEEDS = [
     "https://decrypt.co/feed",
 ]
 
+# Fonction pour récupérer et envoyer les articles
+def fetch_and_send_articles():
+    """Récupère les articles RSS et les envoie vers Kafka"""
+    try:
+        all_articles = []
+        
+        # Récupérer les articles de tous les flux RSS
+        for feed_url in RSS_FEEDS:
+            print(f"Fetching RSS feed: {feed_url}")
+            articles = parse_rss_feed(feed_url)
+            all_articles.extend(articles)
+            print(f"Found {len(articles)} articles from {feed_url}")
+        
+        # Envoyer chaque article vers Kafka
+        for article in all_articles:
+            try:
+                producer.send(TOPIC, article)
+                print(f"Sent article: {article['title'][:50]}...")
+            except Exception as e:
+                print(f"Erreur Kafka pour l'article {article.get('title', 'unknown')}: {e}")
+        
+        producer.flush()
+        print(f"✅ Sent {len(all_articles)} articles to Kafka")
+        return len(all_articles)
+    except Exception as e:
+        print(f"Error fetching RSS feeds: {e}")
+        return 0
+
 def parse_rss_feed(url):
     """Parse un flux RSS et retourne les articles"""
     try:
@@ -80,30 +108,17 @@ def parse_rss_feed(url):
         print(f"Erreur lors du parsing du flux RSS {url}: {e}")
         return []
 
+# Récupérer immédiatement au démarrage
+print("🚀 Démarrage de la récupération RSS...")
+fetch_and_send_articles()
+
+# Puis continuer en boucle toutes les heures
 while True:
     try:
-        all_articles = []
-        
-        # Récupérer les articles de tous les flux RSS
-        for feed_url in RSS_FEEDS:
-            print(f"Fetching RSS feed: {feed_url}")
-            articles = parse_rss_feed(feed_url)
-            all_articles.extend(articles)
-            print(f"Found {len(articles)} articles from {feed_url}")
-        
-        # Envoyer chaque article vers Kafka
-        for article in all_articles:
-            try:
-                producer.send(TOPIC, article)
-                print(f"Sent article: {article['title'][:50]}...")
-            except Exception as e:
-                print(f"Erreur Kafka pour l'article {article.get('title', 'unknown')}: {e}")
-        
-        producer.flush()
-        print(f"Sent {len(all_articles)} articles to Kafka")
-        
-        # Attendre 1 heure avant de récupérer à nouveau (les flux RSS sont généralement mis à jour moins fréquemment)
+        # Attendre 1 heure avant de récupérer à nouveau
+        print("⏳ Attente de 1 heure avant la prochaine récupération...")
         time.sleep(3600)
+        fetch_and_send_articles()
     except Exception as e:
-        print("Error fetching RSS feeds:", e)
+        print(f"Error in main loop: {e}")
         time.sleep(60)

@@ -16,19 +16,60 @@ const PriceNotifications = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isManualNavigation, setIsManualNavigation] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Récupérer les articles RSS depuis l'API
   const fetchRSSArticles = async () => {
     try {
-      const response = await fetch('http://localhost:5000/rss/articles?limit=20');
-      const data = await response.json();
-      if (data.articles && data.articles.length > 0) {
+      console.log('🔄 Récupération des articles RSS...');
+      let response = await fetch('http://localhost:5000/rss/articles?limit=20');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      let data = await response.json();
+      console.log('📰 Données reçues:', data);
+      
+      // Si aucun article récent, récupérer au moins le dernier article disponible
+      if (!data.articles || data.articles.length === 0) {
+        console.log('⚠️ Aucun article récent, récupération du dernier article...');
+        response = await fetch('http://localhost:5000/rss/articles?limit=1');
+        if (response.ok) {
+          data = await response.json();
+          if (data.articles && data.articles.length > 0) {
+            console.log('✅ Dernier article disponible chargé');
+            setArticles(data.articles);
+            setIsLoading(false);
+            return;
+          }
+        }
+        console.warn('⚠️ Aucun article disponible dans la base de données');
+        setIsLoading(false);
+      } else {
+        console.log(`✅ ${data.articles.length} articles chargés`);
         setArticles(data.articles);
         setIsLoading(false);
       }
     } catch (error) {
-      console.error('Erreur lors de la récupération des articles RSS:', error);
+      console.error('❌ Erreur lors de la récupération des articles RSS:', error);
+      // En cas d'erreur, essayer de récupérer au moins le dernier article
+      try {
+        console.log('🔄 Tentative de récupération du dernier article...');
+        const fallbackResponse = await fetch('http://localhost:5000/rss/articles?limit=1');
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          if (fallbackData.articles && fallbackData.articles.length > 0) {
+            console.log('✅ Dernier article récupéré en fallback');
+            setArticles(fallbackData.articles);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (fallbackError) {
+        console.error('❌ Erreur lors de la récupération de fallback:', fallbackError);
+      }
       setIsLoading(false);
     }
   };
@@ -41,16 +82,16 @@ const PriceNotifications = () => {
     return () => clearInterval(refreshInterval);
   }, []);
 
-  // Rotation automatique des articles
+  // Rotation automatique des articles (seulement si navigation manuelle inactive)
   useEffect(() => {
-    if (articles.length === 0) return;
+    if (articles.length === 0 || isManualNavigation) return;
 
     // Changer d'article toutes les 8 secondes avec animation
     intervalRef.current = setInterval(() => {
       setIsTransitioning(true);
       // Après la transition, changer d'article
       setTimeout(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % articles.length);
+        setCurrentIndex((prevIndex: number) => (prevIndex + 1) % articles.length);
         setIsTransitioning(false);
       }, 300);
     }, 8000);
@@ -60,7 +101,43 @@ const PriceNotifications = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [articles.length]);
+  }, [articles.length, isManualNavigation]);
+
+  // Réactiver la navigation automatique après 30 secondes d'inactivité manuelle
+  useEffect(() => {
+    if (isManualNavigation) {
+      const timeout = setTimeout(() => {
+        setIsManualNavigation(false);
+      }, 30000); // 30 secondes
+      return () => clearTimeout(timeout);
+    }
+  }, [isManualNavigation, currentIndex]);
+
+  // Fonction pour naviguer vers l'article précédent
+  const goToPrevious = () => {
+    if (articles.length <= 1) return;
+    setIsManualNavigation(true);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prevIndex: number) => 
+        prevIndex === 0 ? articles.length - 1 : prevIndex - 1
+      );
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  // Fonction pour naviguer vers l'article suivant
+  const goToNext = () => {
+    if (articles.length <= 1) return;
+    setIsManualNavigation(true);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prevIndex: number) => 
+        (prevIndex + 1) % articles.length
+      );
+      setIsTransitioning(false);
+    }, 300);
+  };
 
   // Fonction pour obtenir le nom de la source (plus court)
   const getSourceName = (source: string) => {
@@ -108,16 +185,22 @@ const PriceNotifications = () => {
     );
   }
 
-  if (articles.length === 0) {
+  // Si aucun article après le chargement, afficher un message de chargement continu
+  if (articles.length === 0 && !isLoading) {
     return (
       <div className="holo-notifications-zone">
         <div className="holo-notification">
           <div className="holo-notification-content">
-            <span>Aucune actualité disponible</span>
+            <span>Récupération des actualités...</span>
           </div>
         </div>
       </div>
     );
+  }
+
+  // Si on a au moins un article, l'afficher (même si c'est le seul)
+  if (articles.length === 0) {
+    return null; // Pendant le chargement initial
   }
 
   const currentArticle = articles[currentIndex];
@@ -125,6 +208,18 @@ const PriceNotifications = () => {
   return (
     <div className="holo-notifications-zone">
       <div className={`holo-notification rss-article ${isTransitioning ? 'transitioning' : ''}`}>
+        {/* Flèche précédente */}
+        {articles.length > 1 && (
+          <button 
+            className="rss-nav-button rss-nav-prev"
+            onClick={goToPrevious}
+            aria-label="Article précédent"
+            title="Article précédent"
+          >
+            ‹
+          </button>
+        )}
+        
         <div className="holo-notification-header">
           <span className="holo-notification-source">
             📰 {getSourceName(currentArticle.source)}
@@ -151,10 +246,26 @@ const PriceNotifications = () => {
             {truncateText(currentArticle.description.replace(/<[^>]*>/g, ''), 100)}
           </div>
         )}
-        {articles.length > 1 && (
+        {articles.length > 1 ? (
           <div className="rss-indicator">
             {currentIndex + 1} / {articles.length}
           </div>
+        ) : (
+          <div className="rss-indicator" style={{ fontSize: '8px', color: 'rgba(0, 255, 255, 0.4)' }}>
+            Dernière actualité disponible
+          </div>
+        )}
+        
+        {/* Flèche suivante */}
+        {articles.length > 1 && (
+          <button 
+            className="rss-nav-button rss-nav-next"
+            onClick={goToNext}
+            aria-label="Article suivant"
+            title="Article suivant"
+          >
+            ›
+          </button>
         )}
       </div>
     </div>
