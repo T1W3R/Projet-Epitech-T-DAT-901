@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from kafka import KafkaConsumer
 import duckdb, json, threading, os
@@ -23,22 +23,88 @@ CREATE TABLE IF NOT EXISTS crypto_prices (
 )
 """)
 
+# Table pour stocker les articles RSS
+con.execute("""
+CREATE TABLE IF NOT EXISTS rss_articles (
+    title TEXT,
+    link TEXT,
+    description TEXT,
+    published TIMESTAMP,
+    guid TEXT,
+    source TEXT,
+    ts TIMESTAMP
+)
+""")
+
 def consume():
     consumer = KafkaConsumer(
         "crypto_prices",
         bootstrap_servers="redpanda:9092",
         value_deserializer=lambda v: json.loads(v.decode("utf-8"))
     )
-    print("✅ Consumer connected to Redpanda")
+    print("✅ Consumer connected to Redpanda (crypto_prices)")
     for msg in consumer:
         data = msg.value
         con.execute(
             "INSERT INTO crypto_prices VALUES (?, ?, ?, ?, NOW())",
             [data["crypto"], data["price"], data["market_cap"], data["volume"]]
         )
-        print("Inserted:", data)
+        print("Inserted crypto price:", data)
+
+def consume_rss():
+    consumer = KafkaConsumer(
+        "rss_articles",
+        bootstrap_servers="redpanda:9092",
+        value_deserializer=lambda v: json.loads(v.decode("utf-8"))
+    )
+    print("✅ Consumer connected to Redpanda (rss_articles)")
+    for msg in consumer:
+        data = msg.value
+        try:
+            # Vérifier si l'article existe déjà (par GUID)
+            guid = data.get("guid", "")
+            if guid:
+                existing = con.execute(
+                    "SELECT guid FROM rss_articles WHERE guid = ?",
+                    [guid]
+                ).fetchone()
+                if existing:
+                    print(f"Article déjà existant (GUID: {guid[:50]}), ignoré")
+                    continue
+            
+            # Convertir la date published en TIMESTAMP
+            published_ts = data.get("published")
+            if published_ts and isinstance(published_ts, str):
+                # Parser la date ISO format
+                try:
+                    # Essayer de parser différents formats de date
+                    if 'T' in published_ts:
+                        published_ts = published_ts.replace('Z', '+00:00')
+                    published_dt = datetime.fromisoformat(published_ts.replace('Z', '+00:00'))
+                    published_ts = published_dt.strftime('%Y-%m-%d %H:%M:%S')
+                except:
+                    published_ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            elif not published_ts:
+                published_ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            con.execute(
+                "INSERT INTO rss_articles VALUES (?, ?, ?, CAST(? AS TIMESTAMP), ?, ?, NOW())",
+                [
+                    data.get("title", ""),
+                    data.get("link", ""),
+                    data.get("description", ""),
+                    published_ts,
+                    guid,
+                    data.get("source", "")
+                ]
+            )
+            print("Inserted RSS article:", data.get("title", "Unknown")[:50])
+        except Exception as e:
+            print(f"Erreur lors de l'insertion de l'article RSS: {e}")
+            print(f"Data: {data}")
 
 threading.Thread(target=consume, daemon=True).start()
+threading.Thread(target=consume_rss, daemon=True).start()
 
 # Dernier prix
 @app.route("/price/<symbol>")
@@ -122,6 +188,57 @@ def history(period, symbol):
 
     except requests.exceptions.RequestException as e:
         return jsonify({"error": f"Erreur de requête CoinGecko: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/rss/articles")
+def get_rss_articles():
+    """Récupère les articles RSS stockés"""
+    try:
+        limit = request.args.get('limit', 50, type=int)
+        rows = con.execute(
+            "SELECT title, link, description, published, source, ts FROM rss_articles ORDER BY published DESC LIMIT ?",
+            [limit]
+        ).fetchall()
+        
+        articles = [
+            {
+                "title": row[0],
+                "link": row[1],
+                "description": row[2],
+                "published": row[3].isoformat() if hasattr(row[3], 'isoformat') else str(row[3]),
+                "source": row[4],
+                "stored_at": row[5].isoformat() if hasattr(row[5], 'isoformat') else str(row[5])
+            }
+            for row in rows
+        ]
+        
+        return jsonify({"articles": articles, "count": len(articles)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/rss/articles/<int:limit>")
+def get_rss_articles_limit(limit):
+    """Récupère les N derniers articles RSS stockés"""
+    try:
+        rows = con.execute(
+            "SELECT title, link, description, published, source, ts FROM rss_articles ORDER BY published DESC LIMIT ?",
+            [limit]
+        ).fetchall()
+        
+        articles = [
+            {
+                "title": row[0],
+                "link": row[1],
+                "description": row[2],
+                "published": row[3].isoformat() if hasattr(row[3], 'isoformat') else str(row[3]),
+                "source": row[4],
+                "stored_at": row[5].isoformat() if hasattr(row[5], 'isoformat') else str(row[5])
+            }
+            for row in rows
+        ]
+        
+        return jsonify({"articles": articles, "count": len(articles)})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
