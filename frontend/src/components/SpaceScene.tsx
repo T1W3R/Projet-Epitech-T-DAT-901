@@ -271,6 +271,7 @@ const SpaceScene = () => {
   
   // États pour le mode édition des écrans
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isDebugUserMode, setIsDebugUserMode] = useState(false); //? Mode dev pour debug les écrans holographiques
   const [transformMode, setTransformMode] = useState<"translate" | "rotate" | "scale">("translate");
   const [selectedScreen, setSelectedScreen] = useState<"chart" | "buyCrypto" | "altcoinMetrics" | "cryptoDetails" | "btcDominance" | null>(null);
   const [screenPositions, setScreenPositions] = useState({
@@ -418,6 +419,7 @@ const SpaceScene = () => {
       </Canvas>
 
       {/* Interface de contrôle holographique */}
+      {isDebugUserMode && (
       <div className="holo-control-panel">
         <div className="holo-control-header">[ CONTRÔLES SYSTÈME ]</div>
 
@@ -499,6 +501,7 @@ rotation: [${rot.map(x => x.toFixed(3)).join(', ')}]`;
           </div>
         )}
       </div>
+      )}
 
       {/* Zone de notifications holographiques */}
       <PriceNotifications />
