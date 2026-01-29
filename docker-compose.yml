@@ -50,7 +50,7 @@ services:
       - redpanda
     environment:
       - KAFKA_BROKER=redpanda:9092
-      - TOPIC=rss_articles
+      - RSS_TOPIC=rss_alerts
     volumes:
       - ./rss-service:/app
 
@@ -61,8 +61,9 @@ services:
     depends_on:
       - redpanda
     environment:
-      - REDPANDA_HOST=redpanda:9092
+      - KAFKA_BROKER=redpanda:9092
       - TOPIC=crypto_prices
+      - RSS_TOPIC=rss_alerts
     ports:
       - "5000:5000"
     volumes:

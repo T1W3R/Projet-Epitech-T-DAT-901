@@ -1,30 +1,52 @@
 # app.py
 import json
 import threading
-import time
 from datetime import datetime
-from flask import Flask
 from flask_socketio import SocketIO
 from kafka import KafkaConsumer
+import duckdb, json, threading, os, time
 import os
+import requests
+from flask_cors import CORS
+from dotenv import load_dotenv
+from flask import Flask, jsonify, Response, stream_with_context
+
 
 # ----------------------------
 # CONFIG
-# ----------------------------
+# ---------------------------
+load_dotenv()
 REDPANDA_HOST = os.environ.get("REDPANDA_HOST", "localhost:19092")
 TOPIC = "crypto-prices"
 GROUP_ID = "crypto-consumers-ws"
+RSS_TOPIC = os.getenv("RSS_TOPIC", "rss_alerts")
 BUFFER_SIZE = 100  # nombre max de messages à bufferiser si aucun client n'est connecté
+
+con = duckdb.connect('crypto.duckdb')
+con.execute("""
+CREATE TABLE IF NOT EXISTS crypto_prices (
+    crypto TEXT,
+    price DOUBLE,
+    market_cap DOUBLE,
+    volume DOUBLE,
+    ts TIMESTAMP
+)
+""")
 
 # ----------------------------
 # APP + SOCKET.IO
 # ----------------------------
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # ----------------------------
 # BUFFER pour messages avant qu'un client se connecte
 # ----------------------------
+# Mémoire temporaire pour les événements RSS récents (affichage temps réel)
+RSS_MAX_EVENTS = 100
+rss_events = []
+rss_lock = threading.Lock()
 message_buffer = []
 
 # ----------------------------
@@ -62,16 +84,68 @@ def kafka_listener():
     except Exception as e:
         print(f"❌ Erreur dans le consumer Kafka : {e}", flush=True)
 
+def consume_rss():
+    """
+    Consumer dédié aux flux RSS sur Kafka.
+    On garde en mémoire uniquement les derniers événements pour le front.
+    """
+    consumer = KafkaConsumer(
+        RSS_TOPIC,
+        bootstrap_servers="redpanda:9092",
+        value_deserializer=lambda v: json.loads(v.decode("utf-8"))
+    )
+    print(f"✅ RSS consumer connected to Redpanda (topic={RSS_TOPIC})")
+    global rss_events
+    for msg in consumer:
+        data = msg.value
+        with rss_lock:
+            rss_events.append(data)
+            if len(rss_events) > RSS_MAX_EVENTS:
+                rss_events = rss_events[-RSS_MAX_EVENTS:]
+        print("Inserted RSS event:", data.get("title", "Sans titre"))
+
 
 # ----------------------------
 # Lancement du thread Kafka
 # ----------------------------
 def start_kafka_thread():
-    t = threading.Thread(target=kafka_listener, daemon=True)
-    t.start()
+    prices = threading.Thread(target=kafka_listener, daemon=True)
+    rss = threading.Thread(target=consume_rss, daemon=True)
+    rss.start()
+    prices.start()
     print("🚀 Thread Kafka lancé", flush=True)
 
 start_kafka_thread()
+
+@app.route("/rss/latest")
+def rss_latest():
+    """Retourne les derniers événements RSS pour debug / fallback."""
+    with rss_lock:
+        latest = list(rss_events)
+    return jsonify(latest)
+
+
+@app.route("/rss/stream")
+def rss_stream():
+    """
+    Flux Server-Sent Events (SSE) pour pousser les news/alertes RSS en continu.
+    Le front se connecte dessus avec EventSource.
+    """
+
+    @stream_with_context
+    def event_stream():
+        last_index = 0
+        while True:
+            with rss_lock:
+                new_events = rss_events[last_index:]
+                last_index = len(rss_events)
+
+            for event in new_events:
+                yield f"data: {json.dumps(event)}\n\n"
+
+            time.sleep(1)
+
+    return Response(event_stream(), mimetype="text/event-stream")
 
 # ----------------------------
 # WebSocket Events

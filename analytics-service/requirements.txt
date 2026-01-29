@@ -11,3 +11,5 @@ asyncio
 uvicorn
 gevent
 gevent-websocket
+duckdb
+requests
