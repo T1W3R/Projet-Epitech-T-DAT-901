@@ -1,6 +1,13 @@
+selenium
 flask
 flask-cors
-kafka-python
-duckdb
-requests
+flask-socketio
 python-dotenv
+eventlet
+kafka-python
+eventlet
+python-socketio[asyncio]
+asyncio
+uvicorn
+gevent
+gevent-websocket

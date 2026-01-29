@@ -39,7 +39,7 @@ services:
     depends_on:
       - redpanda
     environment:
-      - KAFKA_BROKER=redpanda:9092
+      - REDPANDA_HOST=redpanda:9092
       - TOPIC=crypto_prices
     volumes:
       - ./scraper-service:/app
@@ -61,7 +61,7 @@ services:
     depends_on:
       - redpanda
     environment:
-      - KAFKA_BROKER=redpanda:9092
+      - REDPANDA_HOST=redpanda:9092
       - TOPIC=crypto_prices
     ports:
       - "5000:5000"

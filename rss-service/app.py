@@ -88,7 +88,7 @@ def parse_rss_feed(url):
                         pub_date = datetime.now().isoformat()
                 except Exception as e:
                     print(f"Erreur parsing date: {e}, date: {entry.published}")
-                    pub_date = datetime.now().isoformat()
+                    pub_date = datetime.now(Con).isoformat()
             else:
                 pub_date = datetime.now().isoformat()
             

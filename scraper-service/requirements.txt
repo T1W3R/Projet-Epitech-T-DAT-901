@@ -1,5 +1,10 @@
-flask
-flask-cors
 kafka-python
 duckdb
 requests
+selenium
+flask
+flask-cors
+flask-socketio
+python-dotenv
+eventlet
+APScheduler
