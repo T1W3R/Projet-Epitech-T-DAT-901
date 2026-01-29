@@ -31,16 +31,14 @@ class CryptoScraper:
         self.topic = 'crypto-prices'
         
         # Liste des cryptos à scraper
-        self.coins = ["bitcoin", "ethereum", "cardano", "solana", "dogecoin", "xrp"]
+        self.coins = ["bitcoin", "ethereum", "cardano", "solana", "polygon", "xrp", "decentraland", "avalanche", "chainlink"]
         
         # Intervalle de scraping (toutes les X secondes)
         self.scraping_interval = 60
         
         # Thread pool pour le scraping parallèle
         self.executor = ThreadPoolExecutor(max_workers=len(self.coins))
-        
-        print(f"✓ Thread pool créé avec {len(self.coins)} workers", flush=True)
-        
+                
         # Scheduler pour déclencher les cycles de scraping
         self.scheduler = BackgroundScheduler()
         self.is_running = True
