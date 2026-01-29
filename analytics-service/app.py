@@ -17,6 +17,7 @@ from flask import Flask, jsonify, Response, stream_with_context
 # ---------------------------
 load_dotenv()
 REDPANDA_HOST = os.environ.get("REDPANDA_HOST", "localhost:19092")
+API_KEY = os.getenv("API_KEY")
 TOPIC = "crypto-prices"
 GROUP_ID = "crypto-consumers-ws"
 RSS_TOPIC = os.getenv("RSS_TOPIC", "rss_alerts")
@@ -27,8 +28,6 @@ con.execute("""
 CREATE TABLE IF NOT EXISTS crypto_prices (
     crypto TEXT,
     price DOUBLE,
-    market_cap DOUBLE,
-    volume DOUBLE,
     ts TIMESTAMP
 )
 """)
@@ -54,8 +53,13 @@ message_buffer = []
 # ----------------------------
 def kafka_listener():
     global message_buffer
+
+    # Connexion DuckDB dans le thread
+    con = duckdb.connect("crypto.duckdb")
+
     try:
         print("📡 Connexion au consumer Kafka...", flush=True)
+
         consumer = KafkaConsumer(
             TOPIC,
             bootstrap_servers=[REDPANDA_HOST],
@@ -65,15 +69,28 @@ def kafka_listener():
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
             key_deserializer=lambda k: k.decode("utf-8") if k else None
         )
-        print("✔ Consumer Kafka connecté", flush=True)
 
-        # boucle infinie de lecture
         for msg in consumer:
             data = msg.value
-            data['received_at'] = datetime.utcnow().isoformat()
+            now = datetime.utcnow()
+
             print(f"📨 Message reçu depuis Kafka : {data}", flush=True)
 
-            # si aucun client connecté, on bufferise
+            # --- INSERT DuckDB ---
+            con.execute(
+                """
+                INSERT INTO crypto_prices (coin, price, ts)
+                VALUES (?, ?, ?)
+                """,
+                (
+                    data.get("coin"),
+                    data.get("price"),
+                    data.get("volume"),
+                    now
+                )
+            )
+
+            # websocket / buffer
             if not socketio.server.manager.rooms.get('/', {}):
                 message_buffer.append(data)
                 if len(message_buffer) > BUFFER_SIZE:
@@ -83,6 +100,7 @@ def kafka_listener():
 
     except Exception as e:
         print(f"❌ Erreur dans le consumer Kafka : {e}", flush=True)
+
 
 def consume_rss():
     """
